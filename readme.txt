@@ -1,2 +1,2 @@
 make scanner
-./scanner input.txt
+./scanner.out input.txt
