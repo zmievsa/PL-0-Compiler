@@ -69,7 +69,8 @@ int main(int argc, char *argv[])
     }
 
     symbol **symbol_table = buildSymbolTable(lexemes);
-    printf("\nNo errors, program is syntactically correct.");
+    printf("\nNo errors, program is syntactically correct.\n");
+    printSymbolTable(symbol_table);
     // instruction **assembly_code = generateAssemblyCode(symbol_table, lexemes);
     // if (print_assembly_code)
     //     printAssemblyCode(assembly_code);

@@ -1,5 +1,21 @@
 #include "symbol.h"
 
+// For logging purposes only
+void printSymbolTable(symbol **table) {
+    elog("printSymbolTable()");
+    elog("Lexeme Table:\nsymbol\t\tkind\t\tval\t\tlevel\t\taddr\t\t");
+    symbol *sym;
+
+    for (int i = 0; i < MAX_LIST_SIZE; i++)
+    {
+        sym = table[i];
+        if (sym == NULL)
+            break;
+        log("%s\t\t%d\t\t%d\t\t%d\t\t%d\n", sym->name, sym->kind, sym->val, sym->level, sym->addr);
+    }
+    elog("");
+}
+
 symbol *symbolTableGet(symbol **sym_table, char *name)
 {
     for (int i = 0; i < MAX_LIST_SIZE; i++)

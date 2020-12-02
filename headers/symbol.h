@@ -22,6 +22,8 @@ typedef struct symbol
 
 } symbol;
 
+void printSymbolTable(symbol **table);
+
 symbol *symbolTableGet(symbol **sym_table, char *name);
 
 int symbolTableContains(symbol **sym_table, char *name);

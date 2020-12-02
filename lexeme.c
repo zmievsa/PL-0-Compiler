@@ -154,7 +154,7 @@ lexeme *scanLexeme(char *token, int token_len, int line)
 void printRawLexemeList(lexeme *lexemes[])
 {
     elog("printRawLexemeList()");
-    printf("Lexeme List:\n");
+    printf("Raw Lexeme List:\n");
     lexeme *lex;
     for (int i = 0; i < MAX_LIST_SIZE; i++)
     {
@@ -165,13 +165,13 @@ void printRawLexemeList(lexeme *lexemes[])
         if (lex->type == 2 || lex->type == 3)
             printf("%s ", lex->data);
     }
-    printf("\n");
+    printf("\n\n");
 }
 
 void printFormattedLexemeList(lexeme *lexemes[])
 {
     elog("printFormattedLexemeList()");
-    printf("Lexeme List:\n");
+    printf("Formatted Lexeme List:\n");
     lexeme *lex;
     for (int i = 0; i < MAX_LIST_SIZE; i++)
     {
@@ -182,5 +182,5 @@ void printFormattedLexemeList(lexeme *lexemes[])
         if (lex->type == 2 || lex->type == 3)
             printf("%s ", lex->data);
     }
-    printf("\n");
+    printf("\n\n");
 }
