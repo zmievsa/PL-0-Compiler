@@ -1,0 +1,152 @@
+// this was written by TA Noelle without direction or suggestion from
+// Professor Montagne, it is entirely possible that it contains error();s
+// if you find an error(); or you have any questions, please email me at 
+// noellemidkiff@knights.ucf.edu
+
+PROGRAM
+	BLOCK
+	if token != .
+		error();
+
+BLOCK
+	constDeclaration(st);
+	varDeclaration(st);
+	statement(st);
+
+constDeclaration(st); 
+	if token == const
+		do
+			nextLexeme();
+			if token != ident
+				error();
+			save ident name
+			if the ident name is already in the symbol table
+				error();
+			nextLexeme();
+			if token != =
+				error();
+			nextLexeme();
+			if token != number
+				error();
+			add to the symbol table (kind 1, saved name, number is current token, lexlevel 0, m 0, unmarked)
+			nextLexeme();
+		while token == ,
+		if token != ;
+			error();
+		nextLexeme();
+
+varDeclaration(st);
+	if token == var
+		numVars = 0
+		do
+			numVars++
+			nextLexeme();
+			if token != ident
+				error();
+			if ident is already in the symbol table
+				error();
+			add to symbol table (kind 2, name is current token, val 0, lexlevel 0, m var# + 2, unmarked)
+			nextLexeme();
+		while token == ,
+		if token != ;
+			error();
+		nextLexeme();
+		
+statement(st);
+	if token == ident
+		if ident is not in the symbol table at all
+			error();
+		if ident != var
+			error();
+		nextLexeme();
+		if token != :=
+			error();
+		nextLexeme();
+		expression(st);
+		return;
+	if token == begin
+		nextLexeme();
+		statement(st);
+		while token == ;
+			nextLexeme();
+			statement(st);
+		if token != end
+			error();
+		nextLexeme();
+		return;
+	if token == if
+		nextLexeme();
+		condition(st);
+		if token != then
+			error();
+		nextLexeme();
+		statement(st);
+		return;
+	if token == while
+		nextLexeme();
+		condition(st);
+		if token != do
+			error();
+		nextLexeme();
+		statement(st);
+		return;
+	if token == read
+		nextLexeme();
+		if token != ident
+			error();
+		if ident is not in the symbol table
+			error();
+		if ident is not a variable
+			error();
+		nextLexeme();
+		return;
+	if token == write
+		nextLexeme();
+		if token != ident
+			error();
+		if ident is not in the symbol table
+			error();
+		nextLexeme();
+		return;
+	return;
+	
+condition(st);
+	if token == odd
+		nextLexeme();
+		expression(st);
+	else
+		expression(st);
+		if token != = <> < <= > >=
+			error();
+		nextLexeme();
+		expression(st);
+		
+expression(st);
+	if token == + -
+		nextLexeme();
+	term(st);
+	while token == + -
+		nextLexeme();
+		term(st);
+
+term(st);
+	factor(st);
+	while token == * /
+		nextLexeme();
+		factor(st);
+
+factor(st);
+	if token == ident
+		if ident is not in the symbol table
+			error();
+		nextLexeme();
+	else if token == number
+		nextLexeme();
+	else if token == (
+		nextLexeme();
+		expression(st);
+		if token != )
+			error();
+		nextLexeme();
+	else
+		error();

@@ -1,54 +1,184 @@
-#ifndef LEXEME_FILE
-#define LEXEME_FILE
-
 #include <stdlib.h>
 #include "lexeme.h"
+#include "config.h"
+#include <stdio.h>
+#include <ctype.h>
 
-struct lexeme *LEXEME_LL_TAIL = NULL;
-// Pointer for iteration
-struct lexeme *LEXEME_LL_ITER_CURRENT = NULL;
-struct lexeme *LEXEME_LL_HEAD = NULL;
+char *LEXEME_TYPES[] = {
+    "",
+    "nulsym",
+    "identsym",
+    "numbersym",
+    "plussym",
+    "minussym",
+    "multsym",
+    "slashsym",
+    "oddsym",
+    "eqlsym",
+    "neqsym",
+    "lessym",
+    "leqsym",
+    "gtrsym",
+    "geqsym",
+    "lparentsym",
+    "rparentsym",
+    "commasym",
+    "semicolonsym",
+    "periodsym",
+    "becomessym",
+    "beginsym",
+    "endsym",
+    "ifsym",
+    "thensym",
+    "whilesym",
+    "dosym",
+    "callsym",
+    "constsym",
+    "varsym",
+    "procsym",
+    "writesym",
+    "readsym",
+    "elsesym",
+};
 
-//insert link at the last location
-void lexeme_insert(char *data, int type)
+lexeme *scanLexeme(char *token, int token_len, int line)
 {
-    struct lexeme *link = (struct lexeme *)malloc(sizeof(struct lexeme));
-
-    link->data = data;
-    link->type = type;
-    link->next = NULL;
-
-    if (LEXEME_LL_HEAD == NULL)
+    int type = -1;
+    if (token_len == 1)
     {
-        LEXEME_LL_TAIL = link;
-        LEXEME_LL_HEAD = link;
-        LEXEME_LL_ITER_CURRENT = link;
+        switch (token[0])
+        {
+        case ('+'):
+            type = PLUSSYM;
+            break;
+
+        case ('-'):
+            type = MINUSSYM;
+            break;
+
+        case ('*'):
+            type = MULTSYM;
+            break;
+
+        case ('/'):
+            type = SLASHSYM;
+            break;
+
+        case ('('):
+            type = LPARENTSYM;
+            break;
+
+        case (')'):
+            type = RPARENTSYM;
+            break;
+
+        case ('='):
+            type = EQLSYM;
+            break;
+
+        case (','):
+            type = COMMASYM;
+            break;
+
+        case ('.'):
+            type = PERIODSYM;
+            break;
+
+        case ('<'):
+            type = LESSYM;
+            break;
+
+        case ('>'):
+            type = GTRSYM;
+            break;
+
+        case (';'):
+            type = SEMICOLONSYM;
+            break;
+        }
     }
     else
     {
-        LEXEME_LL_HEAD->next = link;
-        LEXEME_LL_HEAD = link;
+        if (streql(token, "const"))
+            type = CONSTSYM;
+        else if (streql(token, "var"))
+            type = VARSYM;
+        else if (streql(token, "procedure"))
+            type = PROCSYM;
+        else if (streql(token, "call"))
+            type = CALLSYM;
+        else if (streql(token, "begin"))
+            type = BEGINSYM;
+        else if (streql(token, "end"))
+            type = ENDSYM;
+        else if (streql(token, "if"))
+            type = IFSYM;
+        else if (streql(token, "then"))
+            type = THENSYM;
+        else if (streql(token, "else"))
+            type = ELSESYM;
+        else if (streql(token, "while"))
+            type = WHILESYM;
+        else if (streql(token, "do"))
+            type = DOSYM;
+        else if (streql(token, "read"))
+            type = READSYM;
+        else if (streql(token, "write"))
+            type = WRITESYM;
+        else if (streql(token, "odd"))
+            type = ODDSYM;
+        else if (streql(token, ":="))
+            type = BECOMESSYM;
+        else if (streql(token, "<>"))
+            type = NEQSYM;
+        else if (streql(token, ">="))
+            type = GEQSYM;
+        else if (streql(token, "<="))
+            type = LEQSYM;
     }
+    if (type == -1)
+    {
+        if (isdigit(token[0]))
+            type = NUMBERSYM;
+        else
+            type = IDENTSYM;
+    }
+    lexeme *lex = (lexeme *)malloc(sizeof(lexeme));
+
+    lex->data = token;
+    lex->type = type;
+    lex->line = line;
+    return lex;
 }
 
-// Reset iteration to be able to iterate linked list again
-void lexeme_reset_iter()
+void printRawLexemeList(lexeme *lexemes[])
 {
-    LEXEME_LL_ITER_CURRENT = LEXEME_LL_TAIL;
+    printf("Lexeme List:\n");
+    lexeme *lex;
+    for (int i = 0; i < MAX_LIST_SIZE; i++)
+    {
+        lex = lexemes[i];
+        if (lex == NULL)
+            break;
+        printf("%d ", lex->type);
+        if (lex->type == 2 || lex->type == 3)
+            printf("%s ", lex->data);
+    }
+    printf("\n");
 }
 
-// Return next item in iteration
-// Returns NULL if iteration is over
-struct lexeme *lexeme_iter()
+void printFormattedLexemeList(lexeme *lexemes[])
 {
-    //save reference to first link
-    struct lexeme *tempLink = LEXEME_LL_ITER_CURRENT;
-    if (LEXEME_LL_ITER_CURRENT != NULL)
-        LEXEME_LL_ITER_CURRENT = LEXEME_LL_ITER_CURRENT->next;
-
-    if (tempLink == NULL)
-        lexeme_reset_iter();
-    return tempLink;
+    printf("Lexeme List:\n");
+    lexeme *lex;
+    for (int i = 0; i < MAX_LIST_SIZE; i++)
+    {
+        lex = lexemes[i];
+        if (lex == NULL)
+            break;
+        printf("%s ", LEXEME_TYPES[lex->type]);
+        if (lex->type == 2 || lex->type == 3)
+            printf("%s ", lex->data);
+    }
+    printf("\n");
 }
-
-#endif

@@ -2,21 +2,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_STACK_HEIGHT 1000
-#define MAX_CODE_LENGTH 500
-#define REGISTER_COUNT 8
-
-typedef struct Instruction
-{
-	int op; // opcode
-	int r;	// R
-	int l;	// L
-	int m;	// M
-} Instruction;
+#include "vm.h"
+#include "config.h"
 
 struct CPU_Registers
 {
-	Instruction *IR; // Instruction Register
+	instruction *IR; // Instruction Register
 	int SP;			 // stack Pointer
 	int BP;			 // Base Pointer
 	int PC;			 // Program Counter
@@ -183,13 +174,13 @@ int execute(int *instructionCounter)
 	return halt;
 }
 
-void execute_bytecode(char *filename)
+void execute_bytecode(char *filename, int print_execution_trace)
 {
 	initialize_globals();
 	int i = 0;
 	printf("Line\tOP\tR\tL\tM\n");
-	Instruction codeText[MAX_CODE_LENGTH];
-	Instruction *cmd = malloc(sizeof(Instruction));
+	instruction codeText[MAX_LIST_SIZE];
+	instruction *cmd = malloc(sizeof(instruction));
 	FILE *fp = fopen(filename, "r");
 	while (fscanf(fp, "%d %d %d %d", &(cmd->op), &(cmd->r), &(cmd->l), &(cmd->m)) != EOF)
 	{

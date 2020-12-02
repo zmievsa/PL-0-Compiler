@@ -1,0 +1,13 @@
+const x = 7, y = 8;
+var a, b, c;
+begin
+	a := x * y * 12;
+	b := -(a - x);
+	c := + a + b + x + y;
+	if odd c then
+		b := -b;
+	while c > x do
+		c := c - y;
+	read b;
+	write c;
+end.

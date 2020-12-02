@@ -1,2 +1,2 @@
-make scanner
-./scanner.out input.txt
+make compiler
+./compiler.out input.txt
