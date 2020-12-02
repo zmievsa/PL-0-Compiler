@@ -24,6 +24,8 @@
 #define GTR 21
 #define GEQ 22
 
+char *opname(int op);
+
 typedef struct instruction
 {
     int op; // opcode
@@ -32,5 +34,8 @@ typedef struct instruction
     int l; // L
     int m; // M
 } instruction;
+
+void printAssemblyCode(instruction** code);
+
 
 #endif

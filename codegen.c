@@ -2,297 +2,353 @@
 #include <stdlib.h>
 #include "instruction.h"
 #include "codegen.h"
+#include "config.h"
 
-#define ttype st->cl->type
-#define nextLexeme() st->cl = st->lex_list[(st->li)++]
-// Gets variable/const name from the next lexeme (assuming we're on the VAR or CONST lexeme rn)
-#define getVarName() st->lex_list[st->li + 1]->data
+#define ltype st->cl->type
+// Gets variable/const name from the next lexeme (assuming we're one past the VAR or CONST lexeme rn)
+#define getVarName() st->cl->data
 
 // Gets variable/const value from the next lexeme (assuming we're on the VAR or CONST lexeme rn)
-#define getVarValue() symbolTableGet(st->sym_table, getVarName())->val
+#define curVar symbolTableGet(st->sym_table, getVarName())
 
 typedef struct state
 {
 	symbol **sym_table;
-	int si; // Next sym_table index
+	int sti; // Next sym_table index
 	lexeme **lex_list;
-	int li; // Next lex_list index
+	int lli; // Next lex_list index
 	// lexeme *cur_lex;
 	instruction **code;
 	int ci;		// Next code index
 	lexeme *cl; // Current lex
 } state;
 
-void emit(state *st, int op, int r, int l, int m)
+static void factor(state *st, int regtoendupin);
+static void term(state *st, int regtoendupin);
+static void expression(state *st, int regtoendupin);
+static void condition(state *st);
+static void statement(state *st);
+static void varDeclaration(state *st, int *varcount);
+static void constDeclaration(state *st);
+static void block(state *st);
+
+static void nextLexeme(state *st) {
+    st->cl = st->lex_list[(st->lli)++];
+    log("%s", st->cl->data);
+}
+
+static void emit(state *st, int op, int r, int l, int m)
 {
-	if (st->ci > MAX_LIST_SIZE)
-		error("too much code");
+	if (st->ci > MAX_LIST_SIZE) {
+		printf("TOO MUCH CODE");
+		exit(1);
+	}
 	else
 	{
-		instruction *instr = st->code[st->ci];
+		instruction *instr = malloc(sizeof(instruction));
 		instr->op = op;
+		instr->op_name = opname(op);
 		instr->r = r;
 		instr->l = l;
 		instr->m = m;
-		st->ci++;
+		st->code[st->ci++] = instr;
+		log("\nemit: %s\t%d\t%d\t%d\n", instr->op_name, r, l, m);
 	}
 }
-int strToNum(char *str)
+static int strToNum(char *str)
 {
 	static char *endptr;
 	return (int)strtol(str, &endptr, 10);
 }
-void factor(state *st, int regtoendupin)
+static void factor(state *st, int regtoendupin)
 {
+	elog("factor() {");
 	symbol *sym;
-	int t = st->cl;
-	if (t == IDENTSYM)
+	if (ltype == IDENTSYM)
 	{
-		sym = st->sym_table[st->si];
-		if (t == CONSTSYM)
+		log("\nfound identsym '%s'\n", st->cl->data);
+		sym = curVar;
+		if (sym->kind == SYMBOL_CONST)
 			emit(st, LIT, regtoendupin, 0, sym->val);
-		if (ttype == VARSYM)
-			emit(st, LOD, regtoendupin, 0, sym->val);
-		nextLexeme(); // token + 1;
+		else if (sym->kind == SYMBOL_VAR)
+			emit(st, LOD, regtoendupin, 0, sym->addr);
+		nextLexeme(st); // token + 1;
 	}
-	else if (t == NUMBERSYM)
+	else if (ltype == NUMBERSYM)
 	{
 		emit(st, LIT, regtoendupin, 0, strToNum(st->cl->data));
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
 	}
 	else
 	{
-		nextLexeme(); // token + 1;
-		EXPRESSION(regtoendupin);
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
+		expression(st, regtoendupin);
+		nextLexeme(st); // token + 1;
 	}
+	elog("} /factor()");
 }
 
-void term(state *st, int regtoendupin)
+static void term(state *st, int regtoendupin)
 {
-	FACTOR(regtoendupin);
-	while (ttype == MULTSYM || ttype == SLASHSYM)
+	elog("term() {");
+	factor(st, regtoendupin);
+	while (ltype == MULTSYM || ltype == SLASHSYM)
 	{
-		if (ttype == MULTSYM)
+		if (ltype == MULTSYM)
 		{
-			nextLexeme(); // token + 1;
-			FACTOR(regtoendupin + 1);
+			elog("began multiplication");
+			nextLexeme(st); // token + 1;
+			factor(st, regtoendupin + 1);
 			emit(st, MUL, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
-		if (ttype == SLASHSYM)
+		if (ltype == SLASHSYM)
 		{
-			nextLexeme(); // token + 1;
-			FACTOR(regtoendupin + 1);
+			nextLexeme(st); // token + 1;
+			factor(st, regtoendupin + 1);
 			emit(st, DIV, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
 	}
+	elog("} /term()");
 }
 
-void expression(state *st, int regtoendupin)
+static void expression(state *st, int regtoendupin)
 {
-	if (ttype == PLUSSYM)
-		nextLexeme(); // token + 1;
-	if (ttype == MINUSSYM)
+	elog("expression() {");
+	if (ltype == PLUSSYM)
+		nextLexeme(st); // token + 1;
+	else if (ltype == MINUSSYM)
 	{
-		nextLexeme(); // token + 1;
-		TERM(regtoendupin);
+		// for (int i = st->lli - 6; i < st->lli + 5; i++)
+		// 	log("\nCur: %s\n", st->lex_list[i]->data);
+		nextLexeme(st); // token + 1;
+		term(st, regtoendupin);
 		emit(st, NEG, regtoendupin, 0, 0);
-		while (ttype == PLUSSYM || ttype == MINUSSYM)
+		while (ltype == PLUSSYM || ltype == MINUSSYM)
 		{
-			if (ttype == PLUSSYM)
+			if (ltype == PLUSSYM)
 			{
-				nextLexeme(); // token + 1;
-				TERM(regtoendupin + 1);
+				nextLexeme(st); // token + 1;
+				term(st, regtoendupin + 1);
 				emit(st, ADD, regtoendupin, regtoendupin, regtoendupin + 1);
 			}
-			if (ttype == MINUSSYM)
+			else
 			{
-				nextLexeme(); // token + 1;
-				TERM(regtoendupin + 1);
+				nextLexeme(st); // token + 1;
+				term(st, regtoendupin + 1);
 				emit(st, SUB, regtoendupin, regtoendupin, regtoendupin + 1);
 			}
 		}
 		return;
 	}
-	TERM(regtoendupin);
-	while (ttype == PLUSSYM || ttype == MINUSSYM)
+	term(st, regtoendupin);
+	while (ltype == PLUSSYM || ltype == MINUSSYM)
 	{
-		if (ttype == PLUSSYM)
+		if (ltype == PLUSSYM)
 		{
-			nextLexeme(); // token + 1;
-			TERM(regtoendupin + 1);
+			nextLexeme(st); // token + 1;
+			term(st, regtoendupin + 1);
 			emit(st, ADD, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
-		if (ttype == MINUSSYM)
+		else
 		{
-			nextLexeme(); // token + 1;
-			TERM(regtoendupin + 1);
+			nextLexeme(st); // token + 1;
+			term(st, regtoendupin + 1);
 			emit(st, SUB, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
 	}
+	elog("} /expression()");
 }
 
-void condition(state *st)
+static void condition(state *st)
 {
-	if (ttype == ODDSYM)
+	elog("condition() {");
+	if (ltype == ODDSYM)
 	{
-		nextLexeme(); // token + 1;
-		EXPRESSION(0);
+		nextLexeme(st); // token + 1;
+		expression(st, 0);
 		emit(st, ODD, 0, 0, 0);
 	}
 	else
 	{
-		EXPRESSION(0);
-		if (ttype == EQLSYM)
+		expression(st, 0);
+		if (ltype == EQLSYM)
 		{
-			nextLexeme(); // token + 1;
-			EXPRESSION(1);
+			nextLexeme(st); // token + 1;
+			expression(st, 1);
 			emit(st, EQL, 0, 0, 1);
 		}
-		if (ttype == NEQSYM)
+		else if (ltype == NEQSYM)
 		{
-			nextLexeme(); // token + 1;
-			EXPRESSION(1);
+			nextLexeme(st); // token + 1;
+			expression(st, 1);
 			emit(st, NEQ, 0, 0, 1);
 		}
-		if (ttype == LESSYM)
+		else if (ltype == LESSYM)
 		{
-			nextLexeme(); // token + 1;
-			EXPRESSION(1);
+			nextLexeme(st); // token + 1;
+			expression(st, 1);
 			emit(st, LSS, 0, 0, 1);
 		}
-		if (ttype == LEQSYM)
+		else if (ltype == LEQSYM)
 		{
-			nextLexeme(); // token + 1;
-			EXPRESSION(1);
+			nextLexeme(st); // token + 1;
+			expression(st, 1);
 			emit(st, LEQ, 0, 0, 1);
 		}
-		if (ttype == GTRSYM)
+		else if (ltype == GTRSYM)
 		{
-			nextLexeme(); // token + 1;
-			EXPRESSION(1);
+			nextLexeme(st); // token + 1;
+			expression(st, 1);
 			emit(st, GTR, 0, 0, 1);
 		}
-		if (ttype == GEQSYM)
+		else if (ltype == GEQSYM)
 		{
-			nextLexeme(); // token + 1;
-			EXPRESSION(1);
+			nextLexeme(st); // token + 1;
+			expression(st, 1);
 			emit(st, GEQ, 0, 0, 1);
 		}
 	}
+    elog("} /condition()");
 }
 
-statement(state *st)
+static void statement(state *st)
 {
-	int savedSymbolTableIndex;
-	instruction *savedCode;
+	elog("statement() {");
+	symbol* savedSymbol;
+	int savedCodeIndex;
 	int savedCodeIndexForCondition;
-	instruction *savedCodeForJump;
-	if (ttype == IDENTSYM)
+	int savedCodeIndexForJump;
+	if (ltype == IDENTSYM)
 	{
-		savedSymbolTableIndex = st->si;
-		nextLexeme(); // token + 2;
-		EXPRESSION(0);
-		emit(st, STO, 0, 0, st->sym_table[savedSymbolTableIndex]->val);
+		savedSymbol = curVar;
+		nextLexeme(st); // token + 2;
+		nextLexeme(st);
+		expression(st, 0);
+		emit(st, STO, 0, 0, savedSymbol->addr);
 	}
-	if (ttype == BEGINSYM)
+	else if (ltype == BEGINSYM)
 	{
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
 		statement(st);
-		while (ttype == SEMICOLONSYM)
+		while (ltype == SEMICOLONSYM)
 		{
-			nextLexeme(); // token + 1;
+			nextLexeme(st); // token + 1;
 			statement(st);
 		}
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
 	}
-	if (ttype == IFSYM)
+	else if (ltype == IFSYM)
 	{
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
 		condition(st);
-		savedCode = st->code[st->ci];
+		savedCodeIndex = st->ci;
 		emit(st, JPC, 0, 0, 0);
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
 		statement(st);
-		savedCode->m = st->code[st->ci]->m;
+		st->code[savedCodeIndex]->m = st->ci;
 	}
-	if (ttype == WHILESYM)
+	else if (ltype == WHILESYM)
 	{
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
 		savedCodeIndexForCondition = st->ci;
 		condition(st);
-		nextLexeme(); // token + 1;
-		savedCodeForJump = st->code[st->ci];
+		nextLexeme(st); // token + 1;
+		savedCodeIndexForJump = st->ci;
 		emit(st, JPC, 0, 0, 0);
 		statement(st);
 		emit(st, JMP, 0, 0, savedCodeIndexForCondition);
-		savedCodeForJump->m = st->ci;
+		st->code[savedCodeIndexForJump]->m = st->ci;
 	}
-	if (ttype == READSYM)
+	else if (ltype == READSYM)
 	{
-		nextLexeme(); // token + 1;
-		// ? save the symbol table index;
-		nextLexeme();			// token + 1;
+		nextLexeme(st); // token + 1;
+		symbol *var = curVar;
+		log("\nvar=%p\n", var);
+		nextLexeme(st);			// token + 1;
 		emit(st, SIO, 0, 0, 2); // READ
-		emit(st, STO, 0, 0, getVarValue());
+		emit(st, STO, 0, 0, var->addr); // Not sure if address is the correct attr
 	}
-	if (ttype == WRITESYM)
+	else if (ltype == WRITESYM)
 	{
-		nextLexeme(); // token + 1;
-		// ? save the symbol table index;
-		if (ttype == VARSYM)
+		elog("Found WRITESYM");
+		nextLexeme(st); // token + 1;
+		symbol *sym = curVar; // Can also be a const
+		if (ltype == SYMBOL_VAR)
 		{
-			emit(st, LOD, 0, 0, getVarValue()); // M comes from the symbol table
+			emit(st, LOD, 0, 0, sym->addr); // M comes from the symbol table
 			emit(st, SIO, 0, 0, 1);				// WRITE
 		}
-		if (ttype == CONSTSYM)
+		else if (ltype == SYMBOL_VAR)
 		{
-			emit(st, LIT, 0, 0, getVarValue()); // M comes from the symbol table(val))
+			emit(st, LIT, 0, 0, sym->val); // M comes from the symbol table(val))
 			emit(st, SIO, 0, 0, 1);				// WRITE
 		}
-		nextLexeme(); // token + 1;
+		nextLexeme(st); // token + 1;
 	}
+	elog("} /statement()");
 }
 
-void block(state *st)
+static void varDeclaration(state *st, int *varcount) {
+	elog("varDeclaration() {");
+	if (ltype == VARSYM)
+	{
+		do
+		{
+			(*varcount)++;
+			nextLexeme(st); // token + 2;
+			nextLexeme(st);
+		} while (ltype == COMMASYM);
+		nextLexeme(st); // token + 1;
+	}
+	elog("} /varDeclaration()");
+}
+
+static void constDeclaration(state *st) {
+	elog("constDeclaration() {");
+	if (ltype == CONSTSYM)
+	{
+		do
+		{
+			nextLexeme(st); // token + 4;
+			nextLexeme(st);
+			nextLexeme(st);
+			nextLexeme(st);
+		} while (ltype == COMMASYM);
+		nextLexeme(st); // token + 1;
+	}
+	elog("} /constDeclaration()");
+}
+
+static void block(state *st)
 {
+	elog("block() {");
 	int varcount = 0;
-	st->cl = st->lex_list[0];
-	if (ttype == CONSTSYM)
-	{
-		do
-		{
-			nextLexeme(); // token + 4;
-		} while (ttype == COMMASYM);
-		nextLexeme(); // token + 1;
-	}
-	if (ttype == VARSYM)
-	{
-		do
-		{
-			varcount++;
-			nextLexeme(); // token + 2;
-		} while (ttype == COMMASYM);
-		nextLexeme(); // token + 1;
-	}
+	nextLexeme(st); // NECESSARY
+	constDeclaration(st);
+	varDeclaration(st, &varcount);
 	emit(st, INC, 0, 0, 3 + varcount);
 	statement(st);
+	elog("} /block()");
 }
 
 instruction **generateAssemblyCode(symbol **sym_table, lexeme **lex_list)
 {
-	instruction *code[MAX_LIST_SIZE] = {NULL};
+	elog("generateAssemblyCode() {");
+	instruction **code = malloc(MAX_LIST_SIZE * sizeof(struct instruction*));
+	for (int i = 0; i < MAX_LIST_SIZE; i++) {
+		code[i] = NULL;
+	}
 	state st = {
 		.lex_list = lex_list,
 		.sym_table = sym_table,
 		.code = code,
-		.li = 0,
-		.si = 0,
+		.lli = 0,
+		.sti = 0,
 		.ci = 0};
 
 	emit(&st, JMP, 0, 0, 1);
 	block(&st);
 	emit(&st, SIO, 0, 0, 3);
-	printf("code has been generated\n");
+	elog("} /generateAssemblyCode()");
 	return code;
 }

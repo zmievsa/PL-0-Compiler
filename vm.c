@@ -18,6 +18,20 @@ int stack[MAX_STACK_HEIGHT];
 char *OPCODES[] = {
 	"", "lit", "rtn", "lod", "sto", "cal", "inc", "jmp", "jpc", "sio", "neg", "add", "sub", "mul", "div", "odd", "mod", "eql", "neq", "lss", "leq", "gtr", "geq"};
 
+void printOutput(int oldPC) {
+    printf("%d %s %d %d %d\t\t\t%d\t%d\t%d\n", oldPC, OPCODES[CPURegisters.IR->op], CPURegisters.IR->r, CPURegisters.IR->l, CPURegisters.IR->m, CPURegisters.PC, CPURegisters.BP, CPURegisters.SP);
+    printf("Registers:");
+    for (int i = 0; i < REGISTER_COUNT; i++)
+        printf(" %d", registers[i]);
+    printf("\nStack:");
+    for (int i = MAX_STACK_HEIGHT - 1, j = 1; i >= CPURegisters.SP; i--, j++) {
+        printf(" %d", stack[i]);
+        if ((j = (j%5)) == 0 && i != CPURegisters.SP)
+            printf(" |");
+    }
+    printf("\n\n");
+}
+
 // Initializes all global constants and stack to their starting values
 void initialize_globals()
 {
@@ -99,7 +113,7 @@ int execute(int *instructionCounter)
 	// SYS
 	case 9:
 		if (CPURegisters.IR->m == 1)
-			printf("%d\n", registers[CPURegisters.IR->r]);
+			printf("\nRegister 0:%d\n\n", registers[CPURegisters.IR->r]);
 		else if (CPURegisters.IR->m == 2)
 			scanf("%d", &registers[CPURegisters.IR->r]);
 		else
@@ -174,36 +188,38 @@ int execute(int *instructionCounter)
 	return halt;
 }
 
-void execute_bytecode(char *filename, int print_execution_trace)
+void executeBytecode(instruction **code, int print_execution_trace)
 {
 	initialize_globals();
 	int i = 0;
-	printf("Line\tOP\tR\tL\tM\n");
-	instruction codeText[MAX_LIST_SIZE];
-	instruction *cmd = malloc(sizeof(instruction));
-	FILE *fp = fopen(filename, "r");
-	while (fscanf(fp, "%d %d %d %d", &(cmd->op), &(cmd->r), &(cmd->l), &(cmd->m)) != EOF)
-	{
-		printf("%d\t%s\t%d\t%d\t%d\n", i, OPCODES[cmd->op], cmd->r, cmd->l, cmd->m);
-		codeText[i] = *cmd;
-		i++;
-	}
-	free(cmd);
-	fclose(fp);
-	printf("\n\n");
 	int halt = 0;
 	int *instructionCounter = (int *)malloc(sizeof(int));
 	*instructionCounter = 0;
+	if (print_execution_trace) {
+		printf("\t\t\t\t\tpc\tbp\tsp\n");
+		printf("Initial values\t\t%d\t%d\t%d\n",
+			CPURegisters.PC, CPURegisters.BP, CPURegisters.SP
+		);
+		printf("Registers:");
+		for (int i = 0; i < REGISTER_COUNT; i++)
+			printf(" %d", registers[i]);
+		printf("\nStack:");
+		for (int i = 0; i < 20; i++)
+			printf(" %d", stack[i]);
+		printf("\n\n");
+	}
 	while (halt == 0)
 	{
 		// Fetch
-		CPURegisters.IR = codeText + CPURegisters.PC;
-
+		CPURegisters.IR = *(code + CPURegisters.PC);
+		int oldPC = CPURegisters.PC;
 		// Increment PC
 		CPURegisters.PC++;
 
 		// Execute
 		halt = execute(instructionCounter);
+		if (print_execution_trace)
+			printOutput(oldPC);
 		if (CPURegisters.IR->op != 7)
 			(*instructionCounter)++;
 	}

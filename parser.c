@@ -20,27 +20,27 @@ typedef struct state
     int cur_level;
 } state;
 
-void factor(state *st);
-void term(state *st);
-void expression(state *st);
-void condition(state *st);
-void statement(state *st);
-void varDeclaration(state *st);
-void constDeclaration(state *st);
-void block(state *st);
+static void factor(state *st);
+static void term(state *st);
+static void expression(state *st);
+static void condition(state *st);
+static void statement(state *st);
+static void varDeclaration(state *st);
+static void constDeclaration(state *st);
+static void block(state *st);
 
-int strToNum(char *str)
+static int strToNum(char *str)
 {
     static char *endptr;
     return (int)strtol(str, &endptr, 10);
 }
 
-void nextLexeme(state *st) {
+static void nextLexeme(state *st) {
     st->cur_lex = st->lex_list[(st->next_lex_list_index)++];
     log("%s", st->cur_lex->data);
 }
 
-void factor(state *st)
+static void factor(state *st)
 {
     elog("factor()");
 
@@ -63,9 +63,10 @@ void factor(state *st)
     }
     else
         error("The preceding factor cannot begin with this symbol.") // TODO: Not sure about this error message
+    elog("/factor()");
 }
 
-void term(state *st)
+static void term(state *st)
 {
     elog("term()");
     factor(st);
@@ -77,7 +78,7 @@ void term(state *st)
     elog("/term()");
 }
 
-void expression(state *st)
+static void expression(state *st)
 {
     elog("expression()");
     if (ltype == PLUSSYM || ltype == MINUSSYM)
@@ -91,7 +92,7 @@ void expression(state *st)
     elog("/expression()");
 }
 
-void condition(state *st)
+static void condition(state *st)
 {
     elog("condition()");
     if (ltype == ODDSYM)
@@ -111,7 +112,7 @@ void condition(state *st)
     elog("/condition()");
 }
 
-void statement(state *st)
+static void statement(state *st)
 {
     elog("statement()");
     if (ltype == IDENTSYM)
@@ -127,10 +128,8 @@ void statement(state *st)
             error("Assignment operator expected.")
         nextLexeme(st);
         expression(st);
-        elog("/statement()");
-        return;
     }
-    if (ltype == BEGINSYM)
+    else if (ltype == BEGINSYM)
     {
         nextLexeme(st);
         statement(st);
@@ -142,10 +141,8 @@ void statement(state *st)
         if (st->cur_lex->type != ENDSYM)
             error("Incorrect symbol after statement part in block.") // TODO: Might be the wrong message
         nextLexeme(st);
-        elog("/statement()");
-        return;
     }
-    if (ltype == IFSYM)
+    else if (ltype == IFSYM)
     {
         nextLexeme(st);
         condition(st);
@@ -153,10 +150,8 @@ void statement(state *st)
             error("then expected.")
         nextLexeme(st);
         statement(st);
-        elog("/statement()");
-        return;
     }
-    if (ltype == WHILESYM)
+    else if (ltype == WHILESYM)
     {
         nextLexeme(st);
         condition(st);
@@ -164,10 +159,8 @@ void statement(state *st)
             error("do expected.")
         nextLexeme(st);
         statement(st);
-        elog("/statement()");
-        return;
     }
-    if (ltype == READSYM)
+    else if (ltype == READSYM)
     {
         nextLexeme(st);
         if (ltype != IDENTSYM)
@@ -179,10 +172,8 @@ void statement(state *st)
         if (sym->kind != SYMBOL_VAR)
             error("Read must be followed by a variable identifier.") // TODO: I made up this message
         nextLexeme(st);
-        elog("/statement()");
-        return;
     }
-    if (ltype == WRITESYM)
+    else if (ltype == WRITESYM)
     {
         nextLexeme(st);
         if (ltype != IDENTSYM)
@@ -190,14 +181,11 @@ void statement(state *st)
         if (!symbolTableContains(st->sym_table, st->cur_lex->data))
             error("Undeclared identifier.")
         nextLexeme(st);
-        elog("/statement()");
-        return;
     }
     elog("/statement()");
-    return;
 }
 
-void varDeclaration(state *st)
+static void varDeclaration(state *st)
 {
     elog("varDeclaration()");
     if (st->cur_lex->type == VARSYM)
@@ -222,7 +210,7 @@ void varDeclaration(state *st)
     elog("/varDeclaration()");
 }
 
-void constDeclaration(state *st)
+static void constDeclaration(state *st)
 {
     elog("constDeclaration()");
     char *symbol_name;
@@ -231,7 +219,6 @@ void constDeclaration(state *st)
     {
         do
         {
-            elog("do");
             // TODO: What if we run out of lexemes?
             nextLexeme(st);
             if (st->cur_lex->type != IDENTSYM)
@@ -256,13 +243,14 @@ void constDeclaration(state *st)
     elog("/constDeclaration()");
 }
 
-void block(state *st)
+static void block(state *st)
 {
     elog("block()");
     nextLexeme(st); // NECESSARY
     constDeclaration(st);
     varDeclaration(st);
     statement(st);
+    elog("/block()");
 }
 
 symbol **buildSymbolTable(lexeme **lex_list)

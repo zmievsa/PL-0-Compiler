@@ -11,7 +11,7 @@
 #include "vm.h"
 #include "config.h"
 #include "parser.h"
-// #include "codegen.h"
+#include "codegen.h"
 
 // This function might be entirely unnecessary
 // int strarr_contains(char *str_arr[], int str_arr_len, char *str)
@@ -71,7 +71,8 @@ int main(int argc, char *argv[])
     symbol **symbol_table = buildSymbolTable(lexemes);
     printf("\nNo errors, program is syntactically correct.\n");
     printSymbolTable(symbol_table);
-    // instruction **assembly_code = generateAssemblyCode(symbol_table, lexemes);
-    // if (print_assembly_code)
-    //     printAssemblyCode(assembly_code);
+    instruction **assembly_code = generateAssemblyCode(symbol_table, lexemes);
+    if (print_assembly_code)
+        printAssemblyCode(assembly_code);
+    executeBytecode(assembly_code, print_execution_trace);
 }
