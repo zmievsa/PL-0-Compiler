@@ -153,6 +153,7 @@ lexeme *scanLexeme(char *token, int token_len, int line)
 
 void printRawLexemeList(lexeme *lexemes[])
 {
+    elog("printRawLexemeList()");
     printf("Lexeme List:\n");
     lexeme *lex;
     for (int i = 0; i < MAX_LIST_SIZE; i++)
@@ -169,6 +170,7 @@ void printRawLexemeList(lexeme *lexemes[])
 
 void printFormattedLexemeList(lexeme *lexemes[])
 {
+    elog("printFormattedLexemeList()");
     printf("Lexeme List:\n");
     lexeme *lex;
     for (int i = 0; i < MAX_LIST_SIZE; i++)

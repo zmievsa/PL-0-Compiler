@@ -2,6 +2,6 @@
 #define __SCANNER_H
 #include "lexeme.h"
 
-lexeme **buildLexemeList(char *input_file);
+lexeme **buildLexemeTable(char *input_file);
 
 #endif
