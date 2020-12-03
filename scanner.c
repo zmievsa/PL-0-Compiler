@@ -39,32 +39,27 @@ void reset_str(char *str, int len)
 // Nonzero value means error
 int check_token(char *token, int token_len, int size_overflow, int invalid_symbols_present, int line)
 {
+    lexeme unfinishedLex = {
+        .data =  token,
+        .type = -1,
+        .line = line
+    };
     if (invalid_symbols_present)
     {
-        printf("\nInvalid symbol present on line %d error.\n", line);
-        return INV_SYMB_PRESENT;
+        error("Invalid symbol present.", &unfinishedLex);
     }
     else if (isdigit(token[0]))
     {
         for (int i = 0; i < token_len; i++)
         {
             if (isLatinAlpha(token[i]))
-            {
-                printf("\nVariable does not start with a letter on line %d error.\n", line);
-                return VAR_NOT_START_WITH_LETTER;
-            }
+                error("Variable does not start with a letter.", &unfinishedLex);
         }
         if (size_overflow || token_len > MAX_NUM_LEN)
-        {
-            printf("\nNumber is too long on line %d error.\n", line);
-            return NUM_TOO_LONG;
-        }
+            error("Number is too long.", &unfinishedLex);
     }
     else if (isLatinAlpha(token[0]) && size_overflow)
-    {
-        printf("\nVariable name is too long error.\n");
-        return NAME_TOO_LONG;
-    }
+        error("Variable name is too long.", &unfinishedLex);
     else if (token_len > 1)
     {
         if (streql(token, "/*"))

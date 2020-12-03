@@ -19,16 +19,16 @@ typedef struct symbol
     int level; // L level
     int addr;  // M address
     int mark;
-
 } symbol;
 
 void printSymbolTable(symbol **table);
 
-symbol *symbolTableGet(symbol **sym_table, char *name);
+symbol *symbolTableGetByName(symbol **sym_table, char *name);
+symbol *symbolTableGetProcByValue(symbol **sym_table, int val);
+symbol *searchSymbolTableBackwards(symbol **sym_table, char *name, int current_size);
 
 int symbolTableContains(symbol **sym_table, char *name);
 
-// TODO: Maybe I should remove mark argument altogether as it is always 0?
-void addToSymbolTable(symbol **sym_table, int next_sym_table_index, int kind, char *name, int val, int addr, int level, int mark);
+void addToSymbolTable(symbol **sym_table, int next_sym_table_index, int kind, char *name, int val, int addr, int level);
 
 #endif

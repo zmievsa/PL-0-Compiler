@@ -1,0 +1,213 @@
+// this was written by TA Noelle without direction or suggestion from
+// Professor Montagne, it is entirely possible that it contains errors
+// if you find an error or you have any questions, please email me at 
+// noellemidkiff@knights.ucf.edu
+
+PROGRAM
+	i = 1
+	foreach symbol in symboltable
+		if symbol is procedure
+			symbol.value = i
+			i++					
+			emit a JMP (7, 0, 0, 0)
+	BLOCK (0)
+	for i = 0; code[i].opcode == 7 (jumps); i++
+		code[i].m = the m value from that procedure's symbol table entry
+	foreach line in code
+		if line.opcode == 5 (calls)
+			find procedure in the symbol table with value line.m
+			line.m = the m value from that symbol table entry
+	emit HALT (9, 0, 0, 3)
+
+BLOCK (lexlevel)
+	numSymbols = 0
+	numVars = 0
+	if token == const
+		do
+			token + 1
+			numSymbols++
+			unmark the const in the symbol table
+			token + 3
+		while token == ,
+		token + 1
+	if token == var
+		do 
+			token + 1
+			numVars++
+			numSymbols++
+			unmark the var in the symbol table
+			token + 1
+		while token == ,
+		token + 1
+	if token == procedure
+		do
+			token + 1
+			numSymbols++
+			unmark the procedure in the symbol table
+			token + 2
+			BLOCK (lexlevel + 1)
+			emit RTN (2, 0, 0, 0)
+			token + 1
+		while token == procedure
+	update the symbol table entry for this procedure (current procedure) M = current code index
+	emit INC (6, 0, 0, 3 + numVars)
+	STATEMENT (lexlevel)
+	mark the last numSymbols number of unmarked symbols
+
+STATEMENT (lexlevel)
+	if token == ident
+		save the symbol table index of the var entry unmarked and closest in lexlevel
+		token + 2
+		EXPRESSION (0, lexlevel)
+		emit STO (4, 0, L comes from the symbol table, M comes from the symbol table)
+	if token == call
+		token + 1
+		save the symbol table index of the procedure entry unmarked and closest in lexlevel
+		emit CAL (5, 0, L = lexlevel - L from the symbol table, M = value from the symbol table entry)
+		token + 1
+	if token == begin
+		token + 1
+		STATEMENT (lexlevel)
+		whlie token == ;
+			token + 1
+			STATEMENT (lexlevel)
+		token + 1
+	if token == if
+		token + 1
+		CONDITION (lexlevel)
+		save the code index for jpc
+		emit JPC (8, 0, 0, 0)
+		token + 1
+		STATEMENT (lexlevel)
+		if token == else
+			token + 1
+			save the current code index for jmp
+			emit JMP (7, 0, 0, 0)
+			fix the jpc from earlier, savedCodeIndexForJPC.M = currentcodeindex
+			STATEMENT (lexlevel)
+			fix the jmp from earlier, savedCodeIndexForJMP.M = currentcodeindex
+		else (ie there was no "else" keyword)
+			fix the jpc from earlier, savedCodeIndexForJPC.M = currentcodeindex
+	if token == while
+		token + 1
+		save the code index for condition
+		CONDITION (lexlevel)
+		token + 1
+		save the code index for jump
+		emit JPC (8, 0, 0, 0)
+		STATEMENT (lexlevel)
+		emit JMP (7, 0, 0, savedCodeIndexForCondition)
+		fix the JPC from earlier, savedCodeIndexForJump.M = currentcodeindex
+	if token == read
+		token + 1
+		save the symbol table index of the var entry unmarked and closest to current lexlevel
+		token + 1
+		emit READ (9, 0, 0, 2)
+		emit STO (4, 0, L = lexlevel - L from the symbol table, M comes from the symbol table)
+	if token == write
+		token + 1
+		EXPRESSION (lexlevel)
+		emit WRITE (9, 0, 0, 1)
+		token + 1
+		
+CONDITION (lexlevel)
+	if token == odd
+		token + 1
+		EXPRESSION (0, lexlevel)
+		emit ODD (15, 0, 0, 0)
+	else
+		EXPRESSION (0, lexlevel)
+		if token == =
+			token + 1
+			EXPRESSION (1, lexlevel)
+			emit EQL (17, 0, 0, 1)
+		if token == <>
+			token + 1
+			EXPRESSION (1, lexlevel)
+			emit NEQ (18, 0, 0, 1) 
+		if token == <
+			token + 1
+			EXPRESSION (1, lexlevel)
+			emit LSS (19, 0, 0, 1)
+		if token == <=
+			token + 1
+			EXPRESSION (1, lexlevel)
+			emit LEQ (20, 0, 0, 1)
+		if token == >
+			token + 1
+			EXPRESSION (1, lexlevel)
+			emit GTR (21, 0, 0, 1)
+		if token == >=
+			token + 1
+			EXPRESSION (1, lexlevel)
+			emit GEQ (22, 0, 0, 1)
+
+EXPRESSION (regtoendupin = int where answer should go, lexlevel)
+	if token == +
+		token + 1
+	if token == -
+		token + 1
+		TERM (regtoendupin, lexlevel)
+		emit NEG (10, regtoendupin, 0, 0)
+		while token == + || -
+			if token == +
+				token + 1
+				TERM (regtoendupin + 1, lexlevel)
+				emit ADD (11, regtoendupin, regtoendupin, regtoendupin + 1)
+			if token == -
+				token + 1
+				TERM (regtoendupin + 1, lexlevel)
+				emit SUB (12, regtoendupin, regtoendupin, regtoendupin + 1)
+		return
+	TERM (regtoendupin, lexlevel)
+	while token == + || -
+		if token == +
+			token + 1
+			TERM (regtoendupin + 1, lexlevel)
+			emit ADD (11, regtoendupin, regtoendupin, regtoendupin + 1)
+		if token == -
+			token + 1
+			TERM (regtoendupin + 1, lexlevel)
+			emit SUB (12, regtoendupin, regtoendupin, regtoendupin + 1)
+			
+TERM (regtoendupin, lexlevel)
+	FACTOR (regtoendupin, lexlevel)
+	while token == * || /
+		if token == *
+			token + 1
+			FACTOR (regtoendupin + 1, lexlevel)
+			emit MUL (13, regtoendupin, regtoendupin, regtoendupin + 1)
+		if token == /
+			token + 1
+			FACTOR (regtoendupin + 1, lexlevel)
+			emit DIV (14, regtoendupin, regtoendupin, regtoendupin + 1)
+
+FACTOR (regtoendupin, lexlevel)
+	if token == ident
+		save the symbol table index of the var or const entry unmarked and closest in lexlevel
+		if token == const
+			emit LIT (1, regtoendupin, 0, value from the symbol table)
+		if token == var
+			emit LOD (3, regtoendupin, L = lexlevel - L from the symbol table, m from the symbol table)
+		token + 1
+	else if token == number
+		emit LIT (1, regtoendupin, 0, number value)
+		token + 1
+	else
+		token + 1
+		EXPRESSION (regtoendupin, lexlevel)
+		token + 1
+
+void emit(int op, int r, int l, int m)
+{
+	if (cx > CODE_SIZE)
+		error too much code
+	else
+	{
+		code[cx].op = op;
+		code[cx].r = r;
+		code[cx].l = l;
+		code[cx].m = m;
+		cx++;
+	}
+}

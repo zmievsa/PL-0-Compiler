@@ -44,6 +44,7 @@ typedef struct lexeme
     int line;
 } lexeme;
 
+void error(char *msg, lexeme *lex);
 lexeme *scanLexeme(char *token, int token_len, int line);
 void printRawLexemeList(lexeme *lexemes[]);
 void printFormattedLexemeList(lexeme *lexemes[]);

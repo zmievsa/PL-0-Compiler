@@ -23,14 +23,14 @@ typedef struct state
 	lexeme *cl; // Current lex
 } state;
 
-static void factor(state *st, int regtoendupin);
-static void term(state *st, int regtoendupin);
-static void expression(state *st, int regtoendupin);
-static void condition(state *st);
-static void statement(state *st);
-static void varDeclaration(state *st, int *varcount);
-static void constDeclaration(state *st);
-static void block(state *st);
+static void factor(state *st, int regtoendupin, int lex_level);
+static void term(state *st, int regtoendupin, int lex_level);
+static void expression(state *st, int regtoendupin, int lex_level);
+static void condition(state *st, int lex_level);
+static void statement(state *st, int lex_level);
+static void varDeclaration(state *st, int *varcount, int lex_level);
+static void constDeclaration(state *st, int lex_level);
+static void block(state *st, int lex_level);
 
 static void nextLexeme(state *st) {
     st->cl = st->lex_list[(st->lli)++];
@@ -60,7 +60,7 @@ static int strToNum(char *str)
 	static char *endptr;
 	return (int)strtol(str, &endptr, 10);
 }
-static void factor(state *st, int regtoendupin)
+static void factor(state *st, int regtoendupin, int lex_level)
 {
 	elog("factor() {");
 	symbol *sym;
@@ -82,36 +82,36 @@ static void factor(state *st, int regtoendupin)
 	else
 	{
 		nextLexeme(st); // token + 1;
-		expression(st, regtoendupin);
+		expression(st, regtoendupin, lex_level);
 		nextLexeme(st); // token + 1;
 	}
 	elog("} /factor()");
 }
 
-static void term(state *st, int regtoendupin)
+static void term(state *st, int regtoendupin, int lex_level)
 {
 	elog("term() {");
-	factor(st, regtoendupin);
+	factor(st, regtoendupin, lex_level);
 	while (ltype == MULTSYM || ltype == SLASHSYM)
 	{
 		if (ltype == MULTSYM)
 		{
 			elog("began multiplication");
 			nextLexeme(st); // token + 1;
-			factor(st, regtoendupin + 1);
+			factor(st, regtoendupin + 1, lex_level);
 			emit(st, MUL, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
 		if (ltype == SLASHSYM)
 		{
 			nextLexeme(st); // token + 1;
-			factor(st, regtoendupin + 1);
+			factor(st, regtoendupin + 1, lex_level);
 			emit(st, DIV, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
 	}
 	elog("} /term()");
 }
 
-static void expression(state *st, int regtoendupin)
+static void expression(state *st, int regtoendupin, int lex_level)
 {
 	elog("expression() {");
 	if (ltype == PLUSSYM)
@@ -121,97 +121,97 @@ static void expression(state *st, int regtoendupin)
 		// for (int i = st->lli - 6; i < st->lli + 5; i++)
 		// 	log("\nCur: %s\n", st->lex_list[i]->data);
 		nextLexeme(st); // token + 1;
-		term(st, regtoendupin);
+		term(st, regtoendupin, lex_level);
 		emit(st, NEG, regtoendupin, 0, 0);
 		while (ltype == PLUSSYM || ltype == MINUSSYM)
 		{
 			if (ltype == PLUSSYM)
 			{
 				nextLexeme(st); // token + 1;
-				term(st, regtoendupin + 1);
+				term(st, regtoendupin + 1, lex_level);
 				emit(st, ADD, regtoendupin, regtoendupin, regtoendupin + 1);
 			}
 			else
 			{
 				nextLexeme(st); // token + 1;
-				term(st, regtoendupin + 1);
+				term(st, regtoendupin + 1, lex_level);
 				emit(st, SUB, regtoendupin, regtoendupin, regtoendupin + 1);
 			}
 		}
 		return;
 	}
-	term(st, regtoendupin);
+	term(st, regtoendupin, lex_level);
 	while (ltype == PLUSSYM || ltype == MINUSSYM)
 	{
 		if (ltype == PLUSSYM)
 		{
 			nextLexeme(st); // token + 1;
-			term(st, regtoendupin + 1);
+			term(st, regtoendupin + 1, lex_level);
 			emit(st, ADD, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
 		else
 		{
 			nextLexeme(st); // token + 1;
-			term(st, regtoendupin + 1);
+			term(st, regtoendupin + 1, lex_level);
 			emit(st, SUB, regtoendupin, regtoendupin, regtoendupin + 1);
 		}
 	}
 	elog("} /expression()");
 }
 
-static void condition(state *st)
+static void condition(state *st, int lex_level)
 {
 	elog("condition() {");
 	if (ltype == ODDSYM)
 	{
 		nextLexeme(st); // token + 1;
-		expression(st, 0);
+		expression(st, 0, lex_level);
 		emit(st, ODD, 0, 0, 0);
 	}
 	else
 	{
-		expression(st, 0);
+		expression(st, 0, lex_level);
 		if (ltype == EQLSYM)
 		{
 			nextLexeme(st); // token + 1;
-			expression(st, 1);
+			expression(st, 1, lex_level);
 			emit(st, EQL, 0, 0, 1);
 		}
 		else if (ltype == NEQSYM)
 		{
 			nextLexeme(st); // token + 1;
-			expression(st, 1);
+			expression(st, 1, lex_level);
 			emit(st, NEQ, 0, 0, 1);
 		}
 		else if (ltype == LESSYM)
 		{
 			nextLexeme(st); // token + 1;
-			expression(st, 1);
+			expression(st, 1, lex_level);
 			emit(st, LSS, 0, 0, 1);
 		}
 		else if (ltype == LEQSYM)
 		{
 			nextLexeme(st); // token + 1;
-			expression(st, 1);
+			expression(st, 1, lex_level);
 			emit(st, LEQ, 0, 0, 1);
 		}
 		else if (ltype == GTRSYM)
 		{
 			nextLexeme(st); // token + 1;
-			expression(st, 1);
+			expression(st, 1, lex_level);
 			emit(st, GTR, 0, 0, 1);
 		}
 		else if (ltype == GEQSYM)
 		{
 			nextLexeme(st); // token + 1;
-			expression(st, 1);
+			expression(st, 1, lex_level);
 			emit(st, GEQ, 0, 0, 1);
 		}
 	}
     elog("} /condition()");
 }
 
-static void statement(state *st)
+static void statement(state *st, int lex_level)
 {
 	elog("statement() {");
 	symbol* savedSymbol;
@@ -223,39 +223,39 @@ static void statement(state *st)
 		savedSymbol = curVar;
 		nextLexeme(st); // token + 2;
 		nextLexeme(st);
-		expression(st, 0);
+		expression(st, 0, lex_level);
 		emit(st, STO, 0, 0, savedSymbol->addr);
 	}
 	else if (ltype == BEGINSYM)
 	{
 		nextLexeme(st); // token + 1;
-		statement(st);
+		statement(st, lex_level);
 		while (ltype == SEMICOLONSYM)
 		{
 			nextLexeme(st); // token + 1;
-			statement(st);
+			statement(st, lex_level);
 		}
 		nextLexeme(st); // token + 1;
 	}
 	else if (ltype == IFSYM)
 	{
 		nextLexeme(st); // token + 1;
-		condition(st);
+		condition(st, lex_level);
 		savedCodeIndex = st->ci;
 		emit(st, JPC, 0, 0, 0);
 		nextLexeme(st); // token + 1;
-		statement(st);
+		statement(st, lex_level);
 		st->code[savedCodeIndex]->m = st->ci;
 	}
 	else if (ltype == WHILESYM)
 	{
 		nextLexeme(st); // token + 1;
 		savedCodeIndexForCondition = st->ci;
-		condition(st);
+		condition(st, lex_level);
 		nextLexeme(st); // token + 1;
 		savedCodeIndexForJump = st->ci;
 		emit(st, JPC, 0, 0, 0);
-		statement(st);
+		statement(st, lex_level);
 		emit(st, JMP, 0, 0, savedCodeIndexForCondition);
 		st->code[savedCodeIndexForJump]->m = st->ci;
 	}
@@ -288,7 +288,7 @@ static void statement(state *st)
 	elog("} /statement()");
 }
 
-static void varDeclaration(state *st, int *varcount) {
+static void varDeclaration(state *st, int *varcount, int lex_level) {
 	elog("varDeclaration() {");
 	if (ltype == VARSYM)
 	{
@@ -303,7 +303,7 @@ static void varDeclaration(state *st, int *varcount) {
 	elog("} /varDeclaration()");
 }
 
-static void constDeclaration(state *st) {
+static void constDeclaration(state *st, int lex_level) {
 	elog("constDeclaration() {");
 	if (ltype == CONSTSYM)
 	{
@@ -319,16 +319,42 @@ static void constDeclaration(state *st) {
 	elog("} /constDeclaration()");
 }
 
-static void block(state *st)
+static void block(state *st, int lex_level)
 {
 	elog("block() {");
 	int varcount = 0;
 	nextLexeme(st); // NECESSARY
-	constDeclaration(st);
-	varDeclaration(st, &varcount);
+	constDeclaration(st, lex_level);
+	varDeclaration(st, &varcount, lex_level);
 	emit(st, INC, 0, 0, 3 + varcount);
-	statement(st);
+	statement(st, lex_level);
 	elog("} /block()");
+}
+
+void prog(state *st) {
+	int procCount = 1; // It's weird but it does need to start with 1
+	symbol *s = 1; // Random non-null value
+	for (int i = 0; s != NULL; i++) {
+		s = st->sym_table[i];
+		if (s->kind == SYMBOL_PROC) {
+			s->val = procCount;
+			procCount++;
+			emit(st, JMP, 0, 0, 0);
+		}
+	}
+	// emit(st, JMP, 0, 0, 1); // OLD CODE
+	block(st, 0);
+	/*
+	for i = 0; code[i].opcode == 7 (jumps); i++
+		code[i].m = the m value from that procedure's symbol table entry
+	*/ // TODO: IMPLEMENT THIS
+	for (int i = 0; i < st->ci; i++) {
+		instruction *instr = st->code[i];
+		if (instr->op == CAL) {
+			instr->m = symbolTableGetProcByValue(st->sym_table, instr->m)->addr;
+		}
+	}
+	emit(st, SIO, 0, 0, 3); // HALT
 }
 
 instruction **generateAssemblyCode(symbol **sym_table, lexeme **lex_list)
@@ -346,9 +372,7 @@ instruction **generateAssemblyCode(symbol **sym_table, lexeme **lex_list)
 		.sti = 0,
 		.ci = 0};
 
-	emit(&st, JMP, 0, 0, 1);
-	block(&st);
-	emit(&st, SIO, 0, 0, 3);
+	prog(&st);
 	elog("} /generateAssemblyCode()");
 	return code;
 }

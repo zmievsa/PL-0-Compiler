@@ -41,6 +41,12 @@ char *LEXEME_TYPES[] = {
     "elsesym",
 };
 
+void error(char *msg, lexeme *lex) {
+    fprintf(stderr, "\n\nError on line %d on token '%s': %s\n", lex->line, lex->data, msg);
+    free(lex);
+    exit(1);
+}
+
 lexeme *scanLexeme(char *token, int token_len, int line)
 {
     int type = -1;
@@ -143,7 +149,7 @@ lexeme *scanLexeme(char *token, int token_len, int line)
         else
             type = IDENTSYM;
     }
-    lexeme *lex = (lexeme *)malloc(sizeof(lexeme));
+    lexeme *lex = malloc(sizeof(lexeme));
 
     lex->data = token;
     lex->type = type;
