@@ -261,6 +261,7 @@ static void statement(state *st, int lex_level)
 	else if (ltype == CALLSYM) {
 		nextLexeme(st);
 		savedSymbol = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
+		log("\nEMIT CALL %s on level %d\n", savedSymbol->name, lex_level);
 		emit(st, CAL, 0, lex_level - savedSymbol->level, savedSymbol->addr);
 		nextLexeme(st);
 	}
@@ -319,7 +320,7 @@ static void statement(state *st, int lex_level)
 	{
 		nextLexeme(st);
 		expression(st, 0, lex_level);
-		nextLexeme(st);
+		// nextLexeme(st);
 		emit(st, SIO, 0, 0, 1);
 	}
 	elog("} /statement()");
@@ -427,21 +428,18 @@ void prog(state *st) {
 		s = st->sym_table[i];
 	}
 	
-	// emit(st, JMP, 0, 0, 1); // TODO: Remove this OLD CODE
 	block(st, 0, st->sym_table[0]);
 	instruction *i;
 	for (int j = 0; (i = st->code[j]) != NULL && i->op == JMP; j++) {
 		i->m = symbolTableGetProcByValue(st->sym_table, j + 1)->addr;
 	}
-	printSymbolTable(st->sym_table);
-	printAssemblyCode(st->code);
-	exit(0);
-	for (int i = 0; i < st->ci; i++) {
-		instruction *instr = st->code[i];
-		if (instr->op == CAL) {
-			instr->m = symbolTableGetProcByValue(st->sym_table, instr->m)->addr;
-		}
-	}
+	// This was in noelle's notes
+	// for (int i = 0; i < st->ci; i++) {
+	// 	instruction *instr = st->code[i];
+	// 	if (instr->op == CAL) {
+	// 		instr->m = symbolTableGetProcByValue(st->sym_table, instr->m)->addr;
+	// 	}
+	// }
 	emit(st, SIO, 0, 0, 3); // HALT
 	elog("} prog()");
 }
