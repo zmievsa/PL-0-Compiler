@@ -129,7 +129,6 @@ static void statement(state *st, int lex_level)
             error("Assignment operator expected.", st->cur_lex);
         nextLexeme(st);
         expression(st, lex_level);
-        return;
     }
     else if (ltype == CALLSYM) {
         nextLexeme(st);
@@ -152,7 +151,6 @@ static void statement(state *st, int lex_level)
         if (ltype != ENDSYM)
             error("Incorrect symbol after statement part in block.", st->cur_lex); // TODO: Might be the wrong message
         nextLexeme(st);
-        return;
     }
     else if (ltype == IFSYM)
     {
@@ -164,7 +162,6 @@ static void statement(state *st, int lex_level)
         if (ltype == ELSESYM)
             nextLexeme(st);
         statement(st, lex_level);
-        return;
     }
     else if (ltype == THENSYM) {
         error("Then without if encountered", st->cur_lex);
@@ -177,7 +174,6 @@ static void statement(state *st, int lex_level)
             error("do expected.", st->cur_lex);
         nextLexeme(st);
         statement(st, lex_level);
-        return;
     }
     else if (ltype == READSYM)
     {
@@ -207,11 +203,6 @@ static void statement(state *st, int lex_level)
             error("Undeclared identifier.", st->cur_lex);
         nextLexeme(st);
     }
-    else {
-        return;
-    }
-    if (ltype != SEMICOLONSYM)
-            error("Semicolon or comma missing.", st->cur_lex);
     elog("/statement()");
 }
 
@@ -332,6 +323,7 @@ static void block(state *st, int lex_level)
     symCount += varDeclaration(st, lex_level);
     symCount += procedureDeclaration(st, lex_level);
     statement(st, lex_level);
+    // TODO: Will most likely need to debug that
     for (int i = old_sti; i < symCount + old_sti; i++) {
         symbol *sym = st->sym_table[i];
         sym->mark = 1;

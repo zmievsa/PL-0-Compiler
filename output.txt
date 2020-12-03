@@ -1,32 +1,141 @@
-0               JMP     0       0       25
-1               JMP     0       0       2
-2               INC     0       0       4
-3               LOD     0       1       4
-4               STO     0       0       3
-5               LOD     0       1       4
-6               LIT     1       0       1
-7               SUB     0       0       1
-8               STO     0       1       4
-9               LOD     0       1       4
-10              LIT     1       0       0
-11              EQL     0       0       1
-12              JPC     0       0       15
-13              LIT     0       0       1
-14              STO     0       1       3
-15              LOD     0       1       4
-16              LIT     1       0       0
-17              GTR     0       0       1
-18              JPC     0       0       20
-19              CAL     0       1       2
-20              LOD     0       1       3
-21              LOD     1       0       3
-22              MUL     0       0       1
-23              STO     0       1       3
-24              RTN     0       0       0
-25              INC     0       0       5
-26              LIT     0       0       3
-27              STO     0       0       4
-28              CAL     0       0       2
-29              LOD     0       0       3
-30              SIO     0       0       1
-31              SIO     0       0       3
+prog() {
+
+block() {
+var
+constDeclaration() {
+
+varDeclaration() {
+x,y,z,v,w;procedure
+} /varDeclaration()
+
+procedureDeclaration() {
+a;
+block() {
+var
+constDeclaration() {
+
+varDeclaration() {
+x,y,u,v;procedure
+} /varDeclaration()
+
+procedureDeclaration() {
+b;
+block() {
+var
+constDeclaration() {
+
+varDeclaration() {
+y,z,v;procedure
+} /varDeclaration()
+
+procedureDeclaration() {
+c;
+block() {
+var
+constDeclaration() {
+
+varDeclaration() {
+y,z;begin
+} /varDeclaration()
+
+procedureDeclaration() {
+
+} /procedureDeclaration()
+
+statement() {
+z
+statement() {
+:=1
+expression() {
+
+term() {
+
+factor() {
+;
+} /factor()
+
+} /term()
+
+} /expression()
+
+} /statement()
+x
+statement() {
+:=y
+expression() {
+
+term() {
+
+factor() {
++
+} /factor()
+
+} /term()
+z
+term() {
+
+factor() {
++
+} /factor()
+
+} /term()
+w
+term() {
+
+factor() {
+;
+} /factor()
+
+} /term()
+
+} /expression()
+
+} /statement()
+end
+statement() {
+
+} /statement()
+
+Begin statement closed
+;
+} /statement()
+
+Got back into the block.
+
+} /block()
+begin
+} /procedureDeclaration()
+
+statement() {
+y
+statement() {
+:=x
+expression() {
+
+term() {
+
+factor() {
++
+} /factor()
+
+} /term()
+u
+term() {
+
+factor() {
++
+} /factor()
+
+} /term()
+w
+term() {
+
+factor() {
+;
+} /factor()
+
+} /term()
+
+} /expression()
+
+} /statement()

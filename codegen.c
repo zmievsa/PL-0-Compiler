@@ -55,7 +55,7 @@ static void emit(state *st, int op, int r, int l, int m)
 		instr->l = l;
 		instr->m = m;
 		st->code[st->ci++] = instr;
-		logInstr(instr);
+		// logInstr(instr);
 	}
 }
 static int strToNum(char *str)
@@ -102,7 +102,6 @@ static void factor(state *st, int regtoendupin, int lex_level)
 	symbol *sym;
 	if (ltype == IDENTSYM)
 	{
-		log("\nfound identsym '%s'\n", st->cl->data);
 		sym = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
 		if (sym->kind == SYMBOL_CONST)
 			emit(st, LIT, regtoendupin, 0, sym->val);
@@ -132,7 +131,6 @@ static void term(state *st, int regtoendupin, int lex_level)
 	{
 		if (ltype == MULTSYM)
 		{
-			elog("began multiplication");
 			nextLexeme(st); // token + 1;
 			factor(st, regtoendupin + 1, lex_level);
 			emit(st, MUL, regtoendupin, regtoendupin, regtoendupin + 1);
@@ -262,7 +260,6 @@ static void statement(state *st, int lex_level)
 	}
 	else if (ltype == CALLSYM) {
 		nextLexeme(st);
-		log("\nCalling: %s\n", ldata);
 		savedSymbol = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
 		emit(st, CAL, 0, lex_level - savedSymbol->level, savedSymbol->addr);
 		nextLexeme(st);
@@ -276,6 +273,7 @@ static void statement(state *st, int lex_level)
 			nextLexeme(st);
 			statement(st, lex_level);
 		}
+		elog("Begin statement closed");
 		nextLexeme(st);
 	}
 	else if (ltype == IFSYM)
@@ -321,8 +319,8 @@ static void statement(state *st, int lex_level)
 	{
 		nextLexeme(st);
 		expression(st, 0, lex_level);
-		emit(st, SIO, 0, 0, 1);
 		nextLexeme(st);
+		emit(st, SIO, 0, 0, 1);
 	}
 	elog("} /statement()");
 }
@@ -340,7 +338,6 @@ static int procedureDeclaration(state *st, int lex_level) {
 			nextLexeme(st);
 			symbol *cur_proc = symbolTableGetByNameAndLevel(st->sym_table, ldata, lex_level);
 			cur_proc->mark = 0;
-			log("\nldata='%s'\n", symbolTableGetByNameAndLevel(st->sym_table, ldata, lex_level)->name);
 			nextLexeme(st);
 			// nextLexeme(st); // Was in noelle's notes
 			block(st, lex_level + 1, cur_proc);
@@ -394,11 +391,12 @@ static int constDeclaration(state *st, int lex_level) {
 }
 
 static void block(state *st, int lex_level, symbol *cur_procedure) {
-	elog("block() {");
+	nextLexeme(st); // NECESSARY
+	lexeme *temp_lex = st->cl;
+	log("\nblock(%d) {\n", temp_lex->line);
 	int varCount = 0;
 	int symCount = 0;
 	int old_sti = st->sti;
-	nextLexeme(st); // NECESSARY
 	symCount += constDeclaration(st, lex_level);
 	varCount = varDeclaration(st, lex_level);
 	symCount += procedureDeclaration(st, lex_level);
@@ -406,14 +404,14 @@ static void block(state *st, int lex_level, symbol *cur_procedure) {
 	cur_procedure->addr = st->ci;
 	emit(st, INC, 0, 0, 3 + varCount);
 	statement(st, lex_level);
-	printSymbolTable(st->sym_table);
-	for (int i = old_sti; i < symCount + old_sti - 1; i++) {
+	elog("Got back into the block.");
+	log("\nsti=%d, old_sti=%d, symCount=%d\n", st->sti, old_sti, symCount);
+	for (int i = old_sti + 1; i < symCount + old_sti + 1; i++) {
         symbol *sym = st->sym_table[i];
-		log("\n%s\n", sym->name);
+		log("\nsym=%s\n", sym->name);
         sym->mark = 1;
     }
-	printSymbolTable(st->sym_table);
-	elog("} /block()");
+	log("\n} block(%d)\n", temp_lex->line);
 }
 
 void prog(state *st) {
@@ -435,6 +433,9 @@ void prog(state *st) {
 	for (int j = 0; (i = st->code[j]) != NULL && i->op == JMP; j++) {
 		i->m = symbolTableGetProcByValue(st->sym_table, j + 1)->addr;
 	}
+	printSymbolTable(st->sym_table);
+	printAssemblyCode(st->code);
+	exit(0);
 	for (int i = 0; i < st->ci; i++) {
 		instruction *instr = st->code[i];
 		if (instr->op == CAL) {

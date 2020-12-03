@@ -59,7 +59,8 @@ BLOCK (lex_level)
 STATEMENT (lex_level)
 	if token == ident
 		save the symbol table index of the var entry unmarked and closest in lex_level
-		nextLexeme(st);nextLexeme(st);
+		nextLexeme(st);
+		nextLexeme(st);
 		EXPRESSION (0, lex_level)
 		emit STO (4, 0, L comes from the symbol table, M comes from the symbol table)
 	if token == call
