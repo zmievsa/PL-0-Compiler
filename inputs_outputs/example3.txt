@@ -12,5 +12,5 @@ procedure fact;
 begin
     n:=3;
     call fact;
-    write f
+    write f;
 end.

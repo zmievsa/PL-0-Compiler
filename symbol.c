@@ -33,6 +33,7 @@ symbol *symbolTableGetProcByValue(symbol **sym_table, int val) {
         {
             if (sym_table[i] == NULL)
                 break;
+            log("\nsymval=%d, val=%d\n", sym_table[i]->val, val);
             if (sym_table[i]->val == val)
                 return sym_table[i];
         }

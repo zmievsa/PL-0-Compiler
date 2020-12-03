@@ -115,7 +115,7 @@ int execute(int *instructionCounter)
 		if (CPURegisters.IR->m == 1)
 			printf("\nRegister 0:%d\n\n", registers[CPURegisters.IR->r]);
 		else if (CPURegisters.IR->m == 2)
-			scanf("%d", &registers[CPURegisters.IR->r]);
+			scanf("Please enter an integer: %d", &registers[CPURegisters.IR->r]);
 		else
 			halt = 1;
 		break;

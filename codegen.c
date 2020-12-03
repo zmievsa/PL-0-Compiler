@@ -5,11 +5,14 @@
 #include "config.h"
 
 #define ltype st->cl->type
+#define ldata st->cl->data
+#define lline st->cl->line
 // Gets variable/const name from the next lexeme (assuming we're one past the VAR or CONST lexeme rn)
 #define getVarName() st->cl->data
 
 // Gets variable/const value from the next lexeme (assuming we're on the VAR or CONST lexeme rn)
 #define curVar symbolTableGet(st->sym_table, getVarName())
+#define logInstr(i) log("\nemit: %s\t%d\t%d\t%d\n", i->op_name, i->r, i->l, i->m)
 
 typedef struct state
 {
@@ -28,9 +31,9 @@ static void term(state *st, int regtoendupin, int lex_level);
 static void expression(state *st, int regtoendupin, int lex_level);
 static void condition(state *st, int lex_level);
 static void statement(state *st, int lex_level);
-static void varDeclaration(state *st, int *varcount, int lex_level);
-static void constDeclaration(state *st, int lex_level);
-static void block(state *st, int lex_level);
+static int varDeclaration(state *st, int lex_level);
+static int constDeclaration(state *st, int lex_level);
+static void block(state *st, int lex_level, symbol* cur_procedure);
 
 static void nextLexeme(state *st) {
     st->cl = st->lex_list[(st->lli)++];
@@ -52,7 +55,7 @@ static void emit(state *st, int op, int r, int l, int m)
 		instr->l = l;
 		instr->m = m;
 		st->code[st->ci++] = instr;
-		log("\nemit: %s\t%d\t%d\t%d\n", instr->op_name, r, l, m);
+		logInstr(instr);
 	}
 }
 static int strToNum(char *str)
@@ -60,6 +63,39 @@ static int strToNum(char *str)
 	static char *endptr;
 	return (int)strtol(str, &endptr, 10);
 }
+
+
+symbol *symbolTableGetByNameAndLevel(symbol **sym_table, char *name, int level)
+{
+    for (int i = 0; i < MAX_LIST_SIZE; i++)
+    {
+		symbol *sym = sym_table[i];
+        if (sym == NULL)
+            break;
+        if (sym->level == level && streql(sym->name, name))
+            return sym_table[i];
+    }
+    return NULL;
+}
+
+
+symbol *symbolTableGetByNameAndClosestLevel(symbol **sym_table, char *name, int level) {
+	symbol *closestByLevel = NULL;
+	symbol *sym;
+	for (int i = 0; i < MAX_LIST_SIZE; i++) {
+		sym = sym_table[i];
+		if (sym == NULL)
+			break;
+		if (streql(sym->name, name)) {
+			if (closestByLevel == NULL || (abs(sym->level - level) < abs(closestByLevel->level - level)))
+				if (sym->mark == 0)
+					closestByLevel = sym;
+		} 
+	}
+	return closestByLevel;
+}
+
+
 static void factor(state *st, int regtoendupin, int lex_level)
 {
 	elog("factor() {");
@@ -67,11 +103,11 @@ static void factor(state *st, int regtoendupin, int lex_level)
 	if (ltype == IDENTSYM)
 	{
 		log("\nfound identsym '%s'\n", st->cl->data);
-		sym = curVar;
+		sym = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
 		if (sym->kind == SYMBOL_CONST)
 			emit(st, LIT, regtoendupin, 0, sym->val);
 		else if (sym->kind == SYMBOL_VAR)
-			emit(st, LOD, regtoendupin, 0, sym->addr);
+			emit(st, LOD, regtoendupin, lex_level - sym->level, sym->addr);
 		nextLexeme(st); // token + 1;
 	}
 	else if (ltype == NUMBERSYM)
@@ -115,25 +151,23 @@ static void expression(state *st, int regtoendupin, int lex_level)
 {
 	elog("expression() {");
 	if (ltype == PLUSSYM)
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 	else if (ltype == MINUSSYM)
 	{
-		// for (int i = st->lli - 6; i < st->lli + 5; i++)
-		// 	log("\nCur: %s\n", st->lex_list[i]->data);
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 		term(st, regtoendupin, lex_level);
 		emit(st, NEG, regtoendupin, 0, 0);
 		while (ltype == PLUSSYM || ltype == MINUSSYM)
 		{
 			if (ltype == PLUSSYM)
 			{
-				nextLexeme(st); // token + 1;
+				nextLexeme(st);
 				term(st, regtoendupin + 1, lex_level);
 				emit(st, ADD, regtoendupin, regtoendupin, regtoendupin + 1);
 			}
 			else
 			{
-				nextLexeme(st); // token + 1;
+				nextLexeme(st);
 				term(st, regtoendupin + 1, lex_level);
 				emit(st, SUB, regtoendupin, regtoendupin, regtoendupin + 1);
 			}
@@ -220,39 +254,55 @@ static void statement(state *st, int lex_level)
 	int savedCodeIndexForJump;
 	if (ltype == IDENTSYM)
 	{
-		savedSymbol = curVar;
-		nextLexeme(st); // token + 2;
+		savedSymbol = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level); // WE DO NOT CHECK THAT IT'S A VARIABLE
+		nextLexeme(st);
 		nextLexeme(st);
 		expression(st, 0, lex_level);
-		emit(st, STO, 0, 0, savedSymbol->addr);
+		emit(st, STO, 0, lex_level - savedSymbol->level, savedSymbol->addr);
+	}
+	else if (ltype == CALLSYM) {
+		nextLexeme(st);
+		log("\nCalling: %s\n", ldata);
+		savedSymbol = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
+		emit(st, CAL, 0, lex_level - savedSymbol->level, savedSymbol->addr);
+		nextLexeme(st);
 	}
 	else if (ltype == BEGINSYM)
 	{
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 		statement(st, lex_level);
 		while (ltype == SEMICOLONSYM)
 		{
-			nextLexeme(st); // token + 1;
+			nextLexeme(st);
 			statement(st, lex_level);
 		}
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 	}
 	else if (ltype == IFSYM)
 	{
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 		condition(st, lex_level);
-		savedCodeIndex = st->ci;
+		int savedCodeIndexForJPC = st->ci;
 		emit(st, JPC, 0, 0, 0);
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 		statement(st, lex_level);
-		st->code[savedCodeIndex]->m = st->ci;
+		if (ltype == ELSESYM) {
+			nextLexeme(st);
+			savedCodeIndexForJump = st->ci;
+			emit(st, JMP, 0, 0, 0);
+			st->code[savedCodeIndexForJPC]->m = st->ci;
+			statement(st, lex_level);
+			st->code[savedCodeIndexForJump]->m = st->ci;
+		}
+		else
+			st->code[savedCodeIndexForJPC]->m = st->ci;
 	}
 	else if (ltype == WHILESYM)
 	{
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 		savedCodeIndexForCondition = st->ci;
 		condition(st, lex_level);
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
 		savedCodeIndexForJump = st->ci;
 		emit(st, JPC, 0, 0, 0);
 		statement(st, lex_level);
@@ -261,93 +311,130 @@ static void statement(state *st, int lex_level)
 	}
 	else if (ltype == READSYM)
 	{
-		nextLexeme(st); // token + 1;
-		symbol *var = curVar;
-		log("\nvar=%p\n", var);
-		nextLexeme(st);			// token + 1;
+		nextLexeme(st);
+		symbol *var = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level); // NOT GUARANTEED TO BE A VAR
+		nextLexeme(st);
 		emit(st, SIO, 0, 0, 2); // READ
-		emit(st, STO, 0, 0, var->addr); // Not sure if address is the correct attr
+		emit(st, STO, 0, lex_level - var->level, var->addr);
 	}
 	else if (ltype == WRITESYM)
 	{
-		elog("Found WRITESYM");
-		nextLexeme(st); // token + 1;
-		symbol *sym = curVar; // Can also be a const
-		if (ltype == SYMBOL_VAR)
-		{
-			emit(st, LOD, 0, 0, sym->addr); // M comes from the symbol table
-			emit(st, SIO, 0, 0, 1);				// WRITE
-		}
-		else if (ltype == SYMBOL_VAR)
-		{
-			emit(st, LIT, 0, 0, sym->val); // M comes from the symbol table(val))
-			emit(st, SIO, 0, 0, 1);				// WRITE
-		}
-		nextLexeme(st); // token + 1;
+		nextLexeme(st);
+		expression(st, 0, lex_level);
+		emit(st, SIO, 0, 0, 1);
+		nextLexeme(st);
 	}
 	elog("} /statement()");
 }
 
-static void varDeclaration(state *st, int *varcount, int lex_level) {
+
+static int procedureDeclaration(state *st, int lex_level) {
+	elog("procedureDeclaration() {");
+	int procCount = 0;
+	if (ltype == PROCSYM)
+	{
+		do
+		{
+			procCount++;
+			st->sti++;
+			nextLexeme(st);
+			symbol *cur_proc = symbolTableGetByNameAndLevel(st->sym_table, ldata, lex_level);
+			cur_proc->mark = 0;
+			log("\nldata='%s'\n", symbolTableGetByNameAndLevel(st->sym_table, ldata, lex_level)->name);
+			nextLexeme(st);
+			// nextLexeme(st); // Was in noelle's notes
+			block(st, lex_level + 1, cur_proc);
+			emit(st, RTN, 0, 0, 0);
+			nextLexeme(st);
+		} while (ltype == PROCSYM);
+	}
+	elog("} /procedureDeclaration()");
+	return procCount;
+}
+
+
+static int varDeclaration(state *st, int lex_level) {
 	elog("varDeclaration() {");
+	int varcount = 0;
 	if (ltype == VARSYM)
 	{
 		do
 		{
-			(*varcount)++;
+			varcount++;
+			st->sti++;
 			nextLexeme(st); // token + 2;
+			symbolTableGetByNameAndLevel(st->sym_table, ldata, lex_level)->mark = 0;
 			nextLexeme(st);
 		} while (ltype == COMMASYM);
 		nextLexeme(st); // token + 1;
 	}
 	elog("} /varDeclaration()");
+	return varcount;
 }
 
-static void constDeclaration(state *st, int lex_level) {
+static int constDeclaration(state *st, int lex_level) {
 	elog("constDeclaration() {");
+	int constCount = 0;
 	if (ltype == CONSTSYM)
 	{
 		do
 		{
-			nextLexeme(st); // token + 4;
+			constCount++;
+			st->sti++;
+			nextLexeme(st);
+			symbolTableGetByNameAndLevel(st->sym_table, ldata, lex_level)->mark = 0;
 			nextLexeme(st);
 			nextLexeme(st);
 			nextLexeme(st);
 		} while (ltype == COMMASYM);
 		nextLexeme(st); // token + 1;
 	}
+	return constCount;
 	elog("} /constDeclaration()");
 }
 
-static void block(state *st, int lex_level)
-{
+static void block(state *st, int lex_level, symbol *cur_procedure) {
 	elog("block() {");
-	int varcount = 0;
+	int varCount = 0;
+	int symCount = 0;
+	int old_sti = st->sti;
 	nextLexeme(st); // NECESSARY
-	constDeclaration(st, lex_level);
-	varDeclaration(st, &varcount, lex_level);
-	emit(st, INC, 0, 0, 3 + varcount);
+	symCount += constDeclaration(st, lex_level);
+	varCount = varDeclaration(st, lex_level);
+	symCount += procedureDeclaration(st, lex_level);
+	symCount += varCount;
+	cur_procedure->addr = st->ci;
+	emit(st, INC, 0, 0, 3 + varCount);
 	statement(st, lex_level);
+	printSymbolTable(st->sym_table);
+	for (int i = old_sti; i < symCount + old_sti - 1; i++) {
+        symbol *sym = st->sym_table[i];
+		log("\n%s\n", sym->name);
+        sym->mark = 1;
+    }
+	printSymbolTable(st->sym_table);
 	elog("} /block()");
 }
 
 void prog(state *st) {
+	elog("prog() {");
 	int procCount = 1; // It's weird but it does need to start with 1
-	symbol *s = 1; // Random non-null value
-	for (int i = 0; s != NULL; i++) {
-		s = st->sym_table[i];
+	symbol *s = st->sym_table[0]; // Random non-null value
+	for (int i = 1; s != NULL; i++) {
 		if (s->kind == SYMBOL_PROC) {
 			s->val = procCount;
-			procCount++;
 			emit(st, JMP, 0, 0, 0);
+			procCount++;
 		}
+		s = st->sym_table[i];
 	}
-	// emit(st, JMP, 0, 0, 1); // OLD CODE
-	block(st, 0);
-	/*
-	for i = 0; code[i].opcode == 7 (jumps); i++
-		code[i].m = the m value from that procedure's symbol table entry
-	*/ // TODO: IMPLEMENT THIS
+	
+	// emit(st, JMP, 0, 0, 1); // TODO: Remove this OLD CODE
+	block(st, 0, st->sym_table[0]);
+	instruction *i;
+	for (int j = 0; (i = st->code[j]) != NULL && i->op == JMP; j++) {
+		i->m = symbolTableGetProcByValue(st->sym_table, j + 1)->addr;
+	}
 	for (int i = 0; i < st->ci; i++) {
 		instruction *instr = st->code[i];
 		if (instr->op == CAL) {
@@ -355,6 +442,7 @@ void prog(state *st) {
 		}
 	}
 	emit(st, SIO, 0, 0, 3); // HALT
+	elog("} prog()");
 }
 
 instruction **generateAssemblyCode(symbol **sym_table, lexeme **lex_list)

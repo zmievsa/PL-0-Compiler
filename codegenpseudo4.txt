@@ -19,184 +19,186 @@ PROGRAM
 			line.m = the m value from that symbol table entry
 	emit HALT (9, 0, 0, 3)
 
-BLOCK (lexlevel)
+BLOCK (lex_level)
 	numSymbols = 0
 	numVars = 0
 	if token == const
 		do
-			token + 1
+			nextLexeme(st);
 			numSymbols++
 			unmark the const in the symbol table
-			token + 3
+			nextLexeme(st);
+			nextLexeme(st);
+			nextLexeme(st);
 		while token == ,
-		token + 1
+		nextLexeme(st);
 	if token == var
 		do 
-			token + 1
+			nextLexeme(st);
 			numVars++
 			numSymbols++
 			unmark the var in the symbol table
-			token + 1
+			nextLexeme(st);
 		while token == ,
-		token + 1
+		nextLexeme(st);
 	if token == procedure
 		do
-			token + 1
+			nextLexeme(st);
 			numSymbols++
 			unmark the procedure in the symbol table
-			token + 2
-			BLOCK (lexlevel + 1)
+			nextLexeme(st);nextLexeme(st);
+			BLOCK (lex_level + 1)
 			emit RTN (2, 0, 0, 0)
-			token + 1
+			nextLexeme(st);
 		while token == procedure
 	update the symbol table entry for this procedure (current procedure) M = current code index
 	emit INC (6, 0, 0, 3 + numVars)
-	STATEMENT (lexlevel)
+	STATEMENT (lex_level)
 	mark the last numSymbols number of unmarked symbols
 
-STATEMENT (lexlevel)
+STATEMENT (lex_level)
 	if token == ident
-		save the symbol table index of the var entry unmarked and closest in lexlevel
-		token + 2
-		EXPRESSION (0, lexlevel)
+		save the symbol table index of the var entry unmarked and closest in lex_level
+		nextLexeme(st);nextLexeme(st);
+		EXPRESSION (0, lex_level)
 		emit STO (4, 0, L comes from the symbol table, M comes from the symbol table)
 	if token == call
-		token + 1
-		save the symbol table index of the procedure entry unmarked and closest in lexlevel
-		emit CAL (5, 0, L = lexlevel - L from the symbol table, M = value from the symbol table entry)
-		token + 1
+		nextLexeme(st);
+		save the symbol table index of the procedure entry unmarked and closest in lex_level
+		emit CAL (5, 0, L = lex_level - L from the symbol table, M = value from the symbol table entry)
+		nextLexeme(st);
 	if token == begin
-		token + 1
-		STATEMENT (lexlevel)
+		nextLexeme(st);
+		STATEMENT (lex_level)
 		whlie token == ;
-			token + 1
-			STATEMENT (lexlevel)
-		token + 1
+			nextLexeme(st);
+			STATEMENT (lex_level)
+		nextLexeme(st);
 	if token == if
-		token + 1
-		CONDITION (lexlevel)
+		nextLexeme(st);
+		CONDITION (lex_level)
 		save the code index for jpc
 		emit JPC (8, 0, 0, 0)
-		token + 1
-		STATEMENT (lexlevel)
+		nextLexeme(st);
+		STATEMENT (lex_level)
 		if token == else
-			token + 1
+			nextLexeme(st);
 			save the current code index for jmp
 			emit JMP (7, 0, 0, 0)
 			fix the jpc from earlier, savedCodeIndexForJPC.M = currentcodeindex
-			STATEMENT (lexlevel)
+			STATEMENT (lex_level)
 			fix the jmp from earlier, savedCodeIndexForJMP.M = currentcodeindex
 		else (ie there was no "else" keyword)
 			fix the jpc from earlier, savedCodeIndexForJPC.M = currentcodeindex
 	if token == while
-		token + 1
+		nextLexeme(st);
 		save the code index for condition
-		CONDITION (lexlevel)
-		token + 1
+		CONDITION (lex_level)
+		nextLexeme(st);
 		save the code index for jump
 		emit JPC (8, 0, 0, 0)
-		STATEMENT (lexlevel)
+		STATEMENT (lex_level)
 		emit JMP (7, 0, 0, savedCodeIndexForCondition)
 		fix the JPC from earlier, savedCodeIndexForJump.M = currentcodeindex
 	if token == read
-		token + 1
-		save the symbol table index of the var entry unmarked and closest to current lexlevel
-		token + 1
+		nextLexeme(st);
+		save the symbol table index of the var entry unmarked and closest to current lex_level
+		nextLexeme(st);
 		emit READ (9, 0, 0, 2)
-		emit STO (4, 0, L = lexlevel - L from the symbol table, M comes from the symbol table)
+		emit STO (4, 0, L = lex_level - L from the symbol table, M comes from the symbol table)
 	if token == write
-		token + 1
-		EXPRESSION (lexlevel)
+		nextLexeme(st);
+		EXPRESSION (lex_level)
 		emit WRITE (9, 0, 0, 1)
-		token + 1
+		nextLexeme(st);
 		
-CONDITION (lexlevel)
+CONDITION (lex_level)
 	if token == odd
-		token + 1
-		EXPRESSION (0, lexlevel)
+		nextLexeme(st);
+		EXPRESSION (0, lex_level)
 		emit ODD (15, 0, 0, 0)
 	else
-		EXPRESSION (0, lexlevel)
+		EXPRESSION (0, lex_level)
 		if token == =
-			token + 1
-			EXPRESSION (1, lexlevel)
+			nextLexeme(st);
+			EXPRESSION (1, lex_level)
 			emit EQL (17, 0, 0, 1)
 		if token == <>
-			token + 1
-			EXPRESSION (1, lexlevel)
+			nextLexeme(st);
+			EXPRESSION (1, lex_level)
 			emit NEQ (18, 0, 0, 1) 
 		if token == <
-			token + 1
-			EXPRESSION (1, lexlevel)
+			nextLexeme(st);
+			EXPRESSION (1, lex_level)
 			emit LSS (19, 0, 0, 1)
 		if token == <=
-			token + 1
-			EXPRESSION (1, lexlevel)
+			nextLexeme(st);
+			EXPRESSION (1, lex_level)
 			emit LEQ (20, 0, 0, 1)
 		if token == >
-			token + 1
-			EXPRESSION (1, lexlevel)
+			nextLexeme(st);
+			EXPRESSION (1, lex_level)
 			emit GTR (21, 0, 0, 1)
 		if token == >=
-			token + 1
-			EXPRESSION (1, lexlevel)
+			nextLexeme(st);
+			EXPRESSION (1, lex_level)
 			emit GEQ (22, 0, 0, 1)
 
-EXPRESSION (regtoendupin = int where answer should go, lexlevel)
+EXPRESSION (regtoendupin = int where answer should go, lex_level)
 	if token == +
-		token + 1
+		nextLexeme(st);
 	if token == -
-		token + 1
-		TERM (regtoendupin, lexlevel)
+		nextLexeme(st);
+		TERM (regtoendupin, lex_level)
 		emit NEG (10, regtoendupin, 0, 0)
 		while token == + || -
 			if token == +
-				token + 1
-				TERM (regtoendupin + 1, lexlevel)
+				nextLexeme(st);
+				TERM (regtoendupin + 1, lex_level)
 				emit ADD (11, regtoendupin, regtoendupin, regtoendupin + 1)
 			if token == -
-				token + 1
-				TERM (regtoendupin + 1, lexlevel)
+				nextLexeme(st);
+				TERM (regtoendupin + 1, lex_level)
 				emit SUB (12, regtoendupin, regtoendupin, regtoendupin + 1)
 		return
-	TERM (regtoendupin, lexlevel)
+	TERM (regtoendupin, lex_level)
 	while token == + || -
 		if token == +
-			token + 1
-			TERM (regtoendupin + 1, lexlevel)
+			nextLexeme(st);
+			TERM (regtoendupin + 1, lex_level)
 			emit ADD (11, regtoendupin, regtoendupin, regtoendupin + 1)
 		if token == -
-			token + 1
-			TERM (regtoendupin + 1, lexlevel)
+			nextLexeme(st);
+			TERM (regtoendupin + 1, lex_level)
 			emit SUB (12, regtoendupin, regtoendupin, regtoendupin + 1)
 			
-TERM (regtoendupin, lexlevel)
-	FACTOR (regtoendupin, lexlevel)
+TERM (regtoendupin, lex_level)
+	FACTOR (regtoendupin, lex_level)
 	while token == * || /
 		if token == *
-			token + 1
-			FACTOR (regtoendupin + 1, lexlevel)
+			nextLexeme(st);
+			FACTOR (regtoendupin + 1, lex_level)
 			emit MUL (13, regtoendupin, regtoendupin, regtoendupin + 1)
 		if token == /
-			token + 1
-			FACTOR (regtoendupin + 1, lexlevel)
+			nextLexeme(st);
+			FACTOR (regtoendupin + 1, lex_level)
 			emit DIV (14, regtoendupin, regtoendupin, regtoendupin + 1)
 
-FACTOR (regtoendupin, lexlevel)
+FACTOR (regtoendupin, lex_level)
 	if token == ident
-		save the symbol table index of the var or const entry unmarked and closest in lexlevel
+		save the symbol table index of the var or const entry unmarked and closest in lex_level
 		if token == const
 			emit LIT (1, regtoendupin, 0, value from the symbol table)
 		if token == var
-			emit LOD (3, regtoendupin, L = lexlevel - L from the symbol table, m from the symbol table)
-		token + 1
+			emit LOD (3, regtoendupin, L = lex_level - L from the symbol table, m from the symbol table)
+		nextLexeme(st);
 	else if token == number
 		emit LIT (1, regtoendupin, 0, number value)
-		token + 1
+		nextLexeme(st);
 	else
-		token + 1
-		EXPRESSION (regtoendupin, lexlevel)
-		token + 1
+		nextLexeme(st);
+		EXPRESSION (regtoendupin, lex_level)
+		nextLexeme(st);
 
 void emit(int op, int r, int l, int m)
 {
