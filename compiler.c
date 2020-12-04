@@ -13,32 +13,6 @@
 #include "parser.h"
 #include "codegen.h"
 
-// This function might be entirely unnecessary
-// int strarr_contains(char *str_arr[], int str_arr_len, char *str)
-// {
-//     for (int i = 0; i < str_arr_len; i++)
-//         if (streql(str_arr[i], str))
-//             return 1;
-//     return 0;
-// }
-
-// This function might be entirely unnecessary
-// char *readFile(char *filename)
-// {
-//     FILE *ifp = fopen(filename, "r");
-//     char *inputfile = malloc(500 * sizeof(char));
-//     char c = fgetc(ifp);
-//     int i = 0;
-//     while (1)
-//     {
-//         inputfile[i++] = c;
-//         c = fgetc(ifp);
-//         if (c == EOF)
-//             break;
-//     }
-//     inputfile[i] = '\0';
-//     return inputfile;
-// }
 
 int main(int argc, char *argv[])
 {
@@ -60,10 +34,20 @@ int main(int argc, char *argv[])
         printf("Error: please, include the file name.");
         return 1;
     }
+    int success = printFileContents(input_filename);
+    if (!success) {
+        printf("\nFile '%s' does not exist.\n", input_filename);
+        exit(1);
+    }
 
     lexeme **lexemes = buildLexemeTable(input_filename);
+    if (lexemes[0] == NULL) {
+        printf("\nNo lexemes found\n");
+        exit(1);
+    }
     if (print_lexeme_list)
     {
+        printLexemeTable(lexemes);
         printRawLexemeList(lexemes);
         printFormattedLexemeList(lexemes);
     }
@@ -74,5 +58,5 @@ int main(int argc, char *argv[])
     instruction **assembly_code = generateAssemblyCode(symbol_table, lexemes);
     if (print_assembly_code)
         printAssemblyCode(assembly_code);
-    // executeBytecode(assembly_code, print_execution_trace);
+    executeBytecode(assembly_code, print_execution_trace);
 }

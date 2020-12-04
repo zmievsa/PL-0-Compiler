@@ -12,12 +12,12 @@ char* opname(int op) {
 
 void printAssemblyCode(instruction** code) {
     elog("printAssemblyCode()");
-    printf("\n\nAssembly Code:\nLine\t\tOP\tR\tL\tM\n");
+    printf("\n\nAssembly Code:\nLine\tOP\tR\tL\tM\n");
     for (int i = 0; i < MAX_LIST_SIZE; i++) {
         instruction *instr = code[i];
         if (instr == NULL)
             break; 
-        printf("%d\t\t%s\t%d\t%d\t%d\n", i, instr->op_name, instr->r, instr->l, instr->m);
+        printf("%d\t%s\t%d\t%d\t%d\n", i, instr->op_name, instr->r, instr->l, instr->m);
     }
     elog("/printAssemblyCode()");
     printf("\n\n");

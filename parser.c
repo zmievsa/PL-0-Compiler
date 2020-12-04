@@ -1,5 +1,3 @@
-// TODO: Maybe I should store the line with each lexeme to reference it with the error?
-
 #include <stdlib.h>
 #include "symbol.h"
 #include "parser.h"
@@ -38,6 +36,8 @@ static int strToNum(char *str)
 
 static void nextLexeme(state *st) {
     st->cur_lex = st->lex_list[(st->next_lex_list_index)++];
+    if (st->cur_lex == NULL)
+        error("Unexpectedly ran out of tokens to parse.", st->lex_list[(st->next_lex_list_index - 2)]);
     log("%s", st->cur_lex->data);
 }
 
@@ -63,7 +63,7 @@ static void factor(state *st, int lex_level)
         nextLexeme(st);
     }
     else
-        error("The preceding factor cannot begin with this symbol.", st->cur_lex); // TODO: Not sure about this error message
+        error("The preceding factor cannot begin with this symbol.", st->cur_lex);
     elog("/factor()");
 }
 
@@ -123,7 +123,7 @@ static void statement(state *st, int lex_level)
         if (sym == NULL)
             error("Undeclared identifier.", st->cur_lex);
         if (sym->kind != SYMBOL_VAR)
-            error("Expected a variable identifier.", st->cur_lex); // TODO: I made up this message
+            error("Expected a variable identifier.", st->cur_lex);
         nextLexeme(st);
         if (ltype != BECOMESSYM)
             error("Assignment operator expected.", st->cur_lex);
@@ -136,7 +136,7 @@ static void statement(state *st, int lex_level)
 		if (s == NULL)
             error("Undeclared identifier.", st->cur_lex);
         if (s->kind != SYMBOL_PROC)
-            error("Procedure name expected.", st->cur_lex); // TODO: Made up message
+            error("call must be followed by a procedure identifier.", st->cur_lex);
 		nextLexeme(st);
     }
     else if (ltype == BEGINSYM)
@@ -149,7 +149,7 @@ static void statement(state *st, int lex_level)
             statement(st, lex_level);
         }
         if (ltype != ENDSYM)
-            error("Incorrect symbol after statement part in block.", st->cur_lex); // TODO: Might be the wrong message
+            error("Semicolon or end expected.", st->cur_lex);
         nextLexeme(st);
     }
     else if (ltype == IFSYM)
@@ -164,7 +164,7 @@ static void statement(state *st, int lex_level)
         statement(st, lex_level);
     }
     else if (ltype == THENSYM) {
-        error("Then without if encountered", st->cur_lex);
+        error("Then without preceding if is prohibited.", st->cur_lex);
     }
     else if (ltype == WHILESYM)
     {
@@ -179,29 +179,19 @@ static void statement(state *st, int lex_level)
     {
         nextLexeme(st);
         if (ltype != IDENTSYM)
-            error("Read must be followed by an identifier", st->cur_lex); // TODO: I made up this message
+            error("Read must be followed by an identifier", st->cur_lex);
         symbol *sym = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
 
         if (sym == NULL)
             error("Undeclared identifier.", st->cur_lex);
         if (sym->kind != SYMBOL_VAR)
-            error("Read must be followed by a variable identifier.", st->cur_lex); // TODO: I made up this message
+            error("Read must be followed by a variable identifier.", st->cur_lex);
         nextLexeme(st);
     }
-    /* Should be replaced by: (according to noelle)
-     * if token == write
-	 *	nextLexeme(st);
-	 *	EXPRESSION (lexlevel)
-	 *	return
-    */
     else if (ltype == WRITESYM)
     {
         nextLexeme(st);
-        if (ltype != IDENTSYM)
-            error("Write must be followed by an identifier.", st->cur_lex); // TODO: I made up this message
-        if (!symbolTableContains(st->sym_table, st->cur_lex->data))
-            error("Undeclared identifier.", st->cur_lex);
-        nextLexeme(st);
+        expression(st, lex_level);
     }
     elog("/statement()");
 }
@@ -213,19 +203,18 @@ static int procedureDeclaration(state *st, int lex_level) {
 		do {
 			nextLexeme(st);
 			if (ltype != IDENTSYM)
-				error("", st->cur_lex);
+				error("procedure must be followed by identifier.", st->cur_lex);
             symbol *s = symbolTableGetByName(st->sym_table, ldata);
 			if (s != NULL && s->mark == 0 && s->level == lex_level)
-				error("", st->cur_lex);
+				error("The identifier is already defined in current namespace.", st->cur_lex);
             symCount++;
 			addToSymbolTable(st->sym_table, st->sti++, 3, ldata, 0, 0, lex_level);
 			nextLexeme(st);
 			if (ltype != SEMICOLONSYM)
-				error("", st->cur_lex);
-			// nextLexeme(st); // From noelle's notes
+				error("Semicolon between statements missing.", st->cur_lex);
 			block(st, lex_level + 1);
 			if (ltype != SEMICOLONSYM)
-				error("", st->cur_lex);
+				error("Semicolon between statements missing.", st->cur_lex);
 			nextLexeme(st);
         } while (ltype == PROCSYM);
     }
@@ -243,10 +232,10 @@ static int varDeclaration(state *st, int lex_level)
         {
             nextLexeme(st);
             if (ltype != IDENTSYM)
-                error("const, var, procedure must be followed by identifier.", st->cur_lex);
+                error("var must be followed by identifier.", st->cur_lex);
             symbol *s = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
             if (s != NULL && s->mark == 0 && s->level == lex_level)
-                error("Redeclaring identifier is not allowed.", st->cur_lex); // TODO: I made this error message because I didn't find a fitting one in the list
+                error("The identifier is already defined in current namespace.", st->cur_lex);
             varcount++;
             addToSymbolTable(
                 st->sym_table, 
@@ -278,20 +267,19 @@ static int constDeclaration(state *st, int lex_level)
     {
         do
         {
-            // TODO: What if we run out of lexemes?
             nextLexeme(st);
             if (ltype != IDENTSYM)
                 error("const, var, procedure must be followed by identifier.", st->cur_lex);
             symbol_name = ldata;
             symbol *s = symbolTableGetByName(st->sym_table, symbol_name);
             if (s != NULL && s->mark == 0 && s->level == lex_level)
-                error("Assignment to constant or procedure is not allowed.", st->cur_lex); // TODO: This message is most likely incorrect.
+                error("The identifier is already defined in current namespace.", st->cur_lex); 
             nextLexeme(st);
             if (ltype != EQLSYM)
                 error("Assignment operator expected.", st->cur_lex);
             nextLexeme(st);
             if (ltype != NUMBERSYM)
-                error("= must be followed by a number.", st->cur_lex); // TODO: Is this a correct message?
+                error("= must be followed by a number.", st->cur_lex);
             symbol_val = strToNum(ldata);
             constCount++;
             addToSymbolTable(
@@ -323,7 +311,6 @@ static void block(state *st, int lex_level)
     symCount += varDeclaration(st, lex_level);
     symCount += procedureDeclaration(st, lex_level);
     statement(st, lex_level);
-    // TODO: Will most likely need to debug that
     for (int i = old_sti; i < symCount + old_sti; i++) {
         symbol *sym = st->sym_table[i];
         sym->mark = 1;

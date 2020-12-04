@@ -1,2 +1,2 @@
 make compiler
-./compiler.out input.txt
+./compile.out input.txt

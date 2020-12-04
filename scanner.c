@@ -37,18 +37,18 @@ void reset_str(char *str, int len)
 }
 
 // Nonzero value means error
-int check_token(char *token, int token_len, int size_overflow, int invalid_symbols_present, int line)
+int check_token(char *token, int token_len, int size_overflow, int invalid_symbols_present, int line, int is_comment)
 {
     lexeme unfinishedLex = {
         .data =  token,
         .type = -1,
         .line = line
     };
-    if (invalid_symbols_present)
+    if (invalid_symbols_present && !is_comment)
     {
         error("Invalid symbol present.", &unfinishedLex);
     }
-    else if (isdigit(token[0]))
+    else if (isdigit(token[0]) && !is_comment)
     {
         for (int i = 0; i < token_len; i++)
         {
@@ -58,14 +58,17 @@ int check_token(char *token, int token_len, int size_overflow, int invalid_symbo
         if (size_overflow || token_len > MAX_NUM_LEN)
             error("Number is too long.", &unfinishedLex);
     }
-    else if (isLatinAlpha(token[0]) && size_overflow)
+    else if (isLatinAlpha(token[0]) && size_overflow && !is_comment)
         error("Variable name is too long.", &unfinishedLex);
     else if (token_len > 1)
     {
         if (streql(token, "/*"))
             return COMMENT_START;
         else if (streql(token, "*/"))
-            return COMMENT_END;
+            if (is_comment)
+                return COMMENT_END;
+            else
+                error("Unexpected comment end symbol.", &unfinishedLex);
     }
     return 0;
 }
@@ -99,17 +102,15 @@ lexeme **buildLexemeTable(char *filename)
         spec = 0;
         invis = 0;
         applying_op = 0;
-        if (lookahead_c == '\n')
-            line++;
         invis = isInvis;
         spec = isSpec;
         applying_op = applyingOP;
         if (lookahead_c == EOF || (invis || (spec || applying_op)) && token_len != 0)
         {
-            if (!applying_op && spec && is_special && token_len == 1 && (token[0] == '<' || token[0] == '>' || token[0] == ':'))
+            if (!applying_op && spec && is_special && token_len == 1 && (token[0] == '<' || token[0] == '>' || token[0] == ':' || (token[0] == '/' && lookahead_c == '*') || (token[0] == '*' && lookahead_c == '/')))
                 ; // Let the compound operator finish building up
             // Error checking
-            else if (check_error_code = check_token(token, token_len, size_overflow, invalid_symbols_present, line))
+            else if (check_error_code = check_token(token, token_len, size_overflow, invalid_symbols_present, line, is_comment))
             {
                 reset_str(token, token_len);
                 token_len = 0;
@@ -138,6 +139,8 @@ lexeme **buildLexemeTable(char *filename)
                 return lexemes;
             }
         }
+        if (lookahead_c == '\n')
+            line++;
         if (is_comment && !((token_len == 0 && lookahead_c == '*') || (token_len == 1 && lookahead_c == '/')))
             continue;
         if (spec)
@@ -154,61 +157,16 @@ lexeme **buildLexemeTable(char *filename)
     }
 }
 
-void printFileContents(char *filename)
+int printFileContents(char *filename)
 {
-    printf("Input file:\n");
     FILE *fp = fopen(filename, "r");
+    if (fp == NULL)
+        return 0;
+    printf("Input file:\n");
     char c;
     while ((c = fgetc(fp)) != EOF)
         printf("%c", c);
-    printf("\n\n\n");
-    fclose(fp);
-}
-
-void printLexemeTable(lexeme **lexemes)
-{
-    printf("Lexeme Table:\nlexeme\t\ttoken type\n");
-    lexeme *lex;
-    for (int i = 0; i < MAX_LIST_SIZE; i++)
-    {
-        lex = lexemes[i];
-        if (lex == NULL)
-            break;
-        printf("%s\t\t%d\n", lex->data, lex->type);
-    }
     printf("\n\n");
+    fclose(fp);
+    return 1;
 }
-
-void printLexemeList(lexeme **lexemes)
-{
-    printf("Lexeme List:\n");
-    lexeme *lex;
-    for (int i = 0; i < MAX_LIST_SIZE; i++)
-    {
-        lex = lexemes[i];
-        if (lex == NULL)
-            break;
-        printf("%d ", lex->type);
-        if (lex->type == 2 || lex->type == 3)
-            printf("%s ", lex->data);
-    }
-    printf("\n");
-}
-
-#if SCANNER_ONLY_DEBUG == 1
-
-int main(int argc, char *argv[])
-{
-    if (argc < 2)
-    {
-        printf("Not enough args.\n");
-        return 1;
-    }
-    char *filename = argv[1];
-    printFileContents(filename);
-    lexeme **lexemes = buildLexemeTable(filename);
-    printLexemeTable(lexemes);
-    printLexemeList(lexemes);
-}
-
-#endif

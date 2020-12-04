@@ -61,30 +61,25 @@ int execute(int *instructionCounter)
 	int halt = 0;
 	switch (CPURegisters.IR->op)
 	{
-	// LIT
-	case 1:
+	case LIT:
 		registers[CPURegisters.IR->r] = CPURegisters.IR->m;
 		break;
 
-	// RTN
-	case 2:
+	case RTN:
 		CPURegisters.SP = CPURegisters.BP + 1;
 		CPURegisters.BP = stack[CPURegisters.SP - 2];
 		CPURegisters.PC = stack[CPURegisters.SP - 3];
 		break;
 
-	// LOD
-	case 3:
+	case LOD:
 		registers[CPURegisters.IR->r] = stack[base(CPURegisters.IR->l, CPURegisters.BP) - CPURegisters.IR->m];
 		break;
 
-	// STO
-	case 4:
+	case STO:
 		stack[base(CPURegisters.IR->l, CPURegisters.BP) - CPURegisters.IR->m] = registers[CPURegisters.IR->r];
 		break;
 
-	// CAL
-	case 5:
+	case CAL:
 		stack[CPURegisters.SP - 1] = base(CPURegisters.IR->l, CPURegisters.BP); // Static Link
 		stack[CPURegisters.SP - 2] = CPURegisters.BP;							// Dynamic Link
 		stack[CPURegisters.SP - 3] = CPURegisters.PC;							// Return Adress
@@ -92,96 +87,82 @@ int execute(int *instructionCounter)
 		CPURegisters.PC = CPURegisters.IR->m;
 		break;
 
-	// INC
-	case 6:
+	case INC:
 		CPURegisters.SP -= CPURegisters.IR->m;
 		break;
 
-	// JMP
-	case 7:
+	case JMP:
 		CPURegisters.PC = CPURegisters.IR->m;
 		break;
 
-	// JPC
-	case 8:
+	case JPC:
 		if (registers[CPURegisters.IR->r] == 0)
 		{
 			CPURegisters.PC = CPURegisters.IR->m;
 		}
 		break;
 
-	// SYS
-	case 9:
+	case SIO:
 		if (CPURegisters.IR->m == 1)
-			printf("\nRegister 0:%d\n\n", registers[CPURegisters.IR->r]);
-		else if (CPURegisters.IR->m == 2)
-			scanf("Please enter an integer: %d", &registers[CPURegisters.IR->r]);
+			printf("\nRegister 0: %d\n\n", registers[CPURegisters.IR->r]);
+		else if (CPURegisters.IR->m == 2) {
+			printf("\nPlease enter an integer: ");
+			scanf("%d", &registers[CPURegisters.IR->r]);
+			printf("\n");
+		}
 		else
 			halt = 1;
 		break;
 
-	// NEG
-	case 10:
+	case NEG:
 		registers[CPURegisters.IR->r] = -registers[CPURegisters.IR->r];
 		break;
 
-	// ADD
-	case 11:
+	case ADD:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] + registers[CPURegisters.IR->m];
 		break;
 
-	// SUB
-	case 12:
+	case SUB:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] - registers[CPURegisters.IR->m];
 		break;
 
-	// MUL
-	case 13:
+	case MUL:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] * registers[CPURegisters.IR->m];
 		break;
 
-	// DIV
-	case 14:
+	case DIV:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] / registers[CPURegisters.IR->m];
 		break;
 
-	// ODD
-	case 15:
+	case ODD:
 		registers[CPURegisters.IR->r] %= 2;
 		break;
 
-	// MOD
-	case 16:
+	case MOD:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] % registers[CPURegisters.IR->m];
 		break;
 
-	// EQL
-	case 17:
+	case EQL:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] == registers[CPURegisters.IR->m];
 		break;
 
-	// NEQ
-	case 18:
+	case NEQ:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] != registers[CPURegisters.IR->m];
 		break;
 
-	// LSS
-	case 19:
+	case LSS:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] < registers[CPURegisters.IR->m];
 		break;
 
-	// LEQ
-	case 20:
+	case LEQ:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] <= registers[CPURegisters.IR->m];
 		break;
 
-	// GTR
-	case 21:
+	case GTR:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] > registers[CPURegisters.IR->m];
 		break;
 
-	// GEQ
-	case 22:
+	case GEQ:
 		registers[CPURegisters.IR->r] = registers[CPURegisters.IR->l] >= registers[CPURegisters.IR->m];
 		break;
 	}
@@ -196,8 +177,8 @@ void executeBytecode(instruction **code, int print_execution_trace)
 	int *instructionCounter = (int *)malloc(sizeof(int));
 	*instructionCounter = 0;
 	if (print_execution_trace) {
-		printf("\t\t\t\t\tpc\tbp\tsp\n");
-		printf("Initial values\t\t%d\t%d\t%d\n",
+		printf("\t\t\t\tpc\tbp\tsp\n");
+		printf("Initial values\t\t\t%d\t%d\t%d\n",
 			CPURegisters.PC, CPURegisters.BP, CPURegisters.SP
 		);
 		printf("Registers:");

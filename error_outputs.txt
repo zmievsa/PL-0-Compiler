@@ -1,0 +1,251 @@
+This file shows all outputs of errors (because the output already contains the input, I will not include input files).
+
+/// Error 1:
+Input file:
+var some_name;.
+
+
+
+Error on line 1 on token 'some_': Invalid symbol present.
+
+/// Error 2:
+Input file:
+var 1someName;.
+
+
+
+Error on line 1 on token '1someName': Variable does not start with a letter.
+
+/// Error 3:
+Input file:
+const num = 123456;.
+
+
+
+Error on line 1 on token '123456': Number is too long.
+
+/// Error 4:
+Input file:
+var a23456789tet;.
+
+
+
+Error on line 1 on token 'a23456789tet': Variable name is too long.
+
+/// Error 5:
+Input file:
+*/.
+
+
+
+Error on line 1 on token '*/': Unexpected comment end symbol.
+
+/// Error 6:
+Input file:
+write 1;
+
+
+
+Error on line 1 on token ';': Period expected.
+
+/// Error 7:
+Input file:
+const + = 2;
+
+
+
+Error on line 1 on token '+': const, var, procedure must be followed by identifier.
+
+/// Error 8:
+Input file:
+var a, b, c, a;.
+
+
+
+Error on line 1 on token 'a': The identifier is already defined in current namespace.
+
+/// Error 9:
+Input file:
+const a;.
+
+
+
+Error on line 1 on token ';': Assignment operator expected.
+
+/// Error 10:
+Input file:
+const a = +;.
+
+
+
+Error on line 1 on token '+': = must be followed by a number.
+
+/// Error 11:
+Input file:
+const a = 2.
+
+
+
+Error on line 1 on token '.': Semicolon or comma missing.
+
+/// Error 12:
+Input file:
+var 2;.
+
+
+
+Error on line 1 on token '2': var must be followed by identifier.
+
+/// Error 13:
+Input file:
+procedure 1;;.
+
+
+
+Error on line 1 on token '1': procedure must be followed by identifier.
+
+/// Error 14:
+Input file:
+procedure a.
+
+
+
+Error on line 1 on token '.': Semicolon between statements missing.
+
+/// Error 15:
+Input file:
+b := 2.
+
+
+
+Error on line 1 on token 'b': Undeclared identifier.
+
+/// Error 16:
+Input file:
+const a = 2;
+begin
+    a := 3;
+end.
+
+
+
+Error on line 3 on token 'a': Expected a variable identifier.
+
+/// Error 17:
+Input file:
+var a;
+begin
+    a = 3;
+end.
+
+
+
+Error on line 3 on token '=': Assignment operator expected.
+
+/// Error 18:
+Input file:
+var a;
+call a.
+
+
+
+Error on line 2 on token 'a': call must be followed by a procedure identifier.
+
+/// Error 19:
+Input file:
+begin
+    write 1
+    write 2
+end.
+
+
+
+Error on line 3 on token 'write': Semicolon or end expected.
+
+/// Error 20:
+Input file:
+begin
+    if 1 <> 0
+        write 0;
+end.
+
+
+
+Error on line 3 on token 'write': then expected.
+
+/// Error 21:
+Input file:
+begin
+    then
+        write 0;
+end.
+
+
+
+Error on line 2 on token 'then': Then without preceding if is prohibited.
+
+/// Error 22:
+Input file:
+var a;
+begin
+    a := 5;
+    while a > 0
+        begin
+            write a;
+            a := a - 1
+        end;
+end.
+
+
+
+Error on line 5 on token 'begin': do expected.
+
+/// Error 23:
+Input file:
+read 1.
+
+
+
+Error on line 1 on token '1': Read must be followed by an identifier
+
+/// Error 24:
+Input file:
+const b = 2;
+read b.
+
+
+
+Error on line 2 on token 'b': Read must be followed by a variable identifier.
+
+/// Error 25:
+Input file:
+if 1 + 2 then
+    write 1.
+
+
+
+Error on line 1 on token 'then': Relational operator expected.
+
+/// Error 26:
+Input file:
+write (1 + 2.
+
+
+
+Error on line 1 on token '.': Right parenthesis missing.
+
+/// Error 27:
+Input file:
+write *1.
+
+
+
+Error on line 1 on token '*': The preceding factor cannot begin with this symbol.
+
+/// Error 28:
+Input file:
+write 1
+
+
+
+Error on line 1 on token '1': Unexpectedly ran out of tokens to parse.

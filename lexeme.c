@@ -42,8 +42,7 @@ char *LEXEME_TYPES[] = {
 };
 
 void error(char *msg, lexeme *lex) {
-    fprintf(stderr, "\n\nError on line %d on token '%s': %s\n", lex->line, lex->data, msg);
-    free(lex);
+    printf("\n\nError on line %d on token '%s': %s\n", lex->line, lex->data, msg);
     exit(1);
 }
 
@@ -155,6 +154,19 @@ lexeme *scanLexeme(char *token, int token_len, int line)
     lex->type = type;
     lex->line = line;
     return lex;
+}
+
+void printLexemeTable(lexeme **lexemes) {
+    printf("Lexeme Table:\nlexeme\t\ttoken type\n");
+    lexeme *lex;
+    for (int i = 0; i < MAX_LIST_SIZE; i++)
+    {
+        lex = lexemes[i];
+        if (lex == NULL)
+            break;
+        printf("%s\t\t%d\n", lex->data, lex->type);
+    }
+    printf("\n\n");
 }
 
 void printRawLexemeList(lexeme *lexemes[])

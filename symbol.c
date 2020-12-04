@@ -3,7 +3,7 @@
 // For logging purposes only
 void printSymbolTable(symbol **table) {
     elog("printSymbolTable()");
-    elog("Lexeme Table:\nsymbol\t\tkind\t\tval\t\tlevel\t\taddr\t\tmark");
+    elog("Symbol Table:\nsymbol\t\tkind\t\tval\t\tlevel\t\taddr\t\tmark");
     symbol *sym;
 
     for (int i = 0; i < MAX_LIST_SIZE; i++)
