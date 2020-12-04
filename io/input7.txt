@@ -1,0 +1,27 @@
+procedure show1;
+	write 1;
+procedure chain1;
+	procedure show2;
+		write 2;
+	procedure chain2;
+		procedure show3;
+			write 3 /* No semicolon error */
+		procedure chain3;
+			procedure show4;
+				write 4;
+			begin
+				call show4;
+                /*RandomComment*/
+				call show3;/* This should better show if I'm doing it right. */
+				call show2;
+				call show1;
+			end;
+		begin
+			call chain3;
+		end;
+	begin
+		call chain2;
+	end;
+begin
+	call chain1;
+end.

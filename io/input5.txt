@@ -1,0 +1,13 @@
+var x;
+
+procedure a;
+
+    var z;
+
+    begin
+        x := 1;
+        write x
+    end;
+
+call a
+.

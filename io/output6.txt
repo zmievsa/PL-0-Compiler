@@ -1,0 +1,71 @@
+Input file:
+var x;
+procedure a;
+;
+call a
+.
+
+Lexeme Table:
+lexeme		token type
+var		29
+x		2
+;		18
+procedure		30
+a		2
+;		18
+;		18
+call		27
+a		2
+.		19
+
+
+Raw Lexeme List:
+29 2 x 18 30 2 a 18 18 27 2 a 19 
+
+Formatted Lexeme List:
+varsym identsym x semicolonsym procsym identsym a semicolonsym semicolonsym callsym identsym a periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	4
+1	JMP	0	0	2
+2	INC	0	0	3
+3	RTN	0	0	0
+4	INC	0	0	4
+5	CAL	0	0	2
+6	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 4			4	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+4 inc 0 0 4			5	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+5 cal 0 0 2			2	995	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+2 inc 0 0 3			3	995	993
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 999 | 999 6
+
+3 rtn 0 0 0			6	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+6 sio 0 0 3			7	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
