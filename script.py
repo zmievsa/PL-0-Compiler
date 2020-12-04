@@ -1,19 +1,10 @@
-def strip(s):
-    return s.replace("\t", "").replace(" ", "").lower()
+with open("error_outputs.txt") as f:
+    text = f.read()
 
-original = """
-"""
-
-mine = """
-"""
-
-for line1, line2 in zip(strip(original).splitlines(), strip(mine).splitlines()):
-    if line1 != line2:
-        print(line1, ":::", line2)
-    else:
-        print(line1, ":::", line2)
-        print('\033[93m')
-
-# for line in mine.splitlines():
-#     if "CAL" in line:
-#         print(line)
+i = 1
+while "Error on line" in text:
+    text = text.replace("Error on line", f"Error number {i} on line", 1)
+    i += 1
+print(text)
+with open("error_outputs.txt", "w") as f:
+    f.write(text)

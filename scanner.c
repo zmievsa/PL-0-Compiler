@@ -46,20 +46,20 @@ int check_token(char *token, int token_len, int size_overflow, int invalid_symbo
     };
     if (invalid_symbols_present && !is_comment)
     {
-        error("Invalid symbol present.", &unfinishedLex);
+        error(1, "Invalid symbol present.", &unfinishedLex);
     }
     else if (isdigit(token[0]) && !is_comment)
     {
         for (int i = 0; i < token_len; i++)
         {
             if (isLatinAlpha(token[i]))
-                error("Variable does not start with a letter.", &unfinishedLex);
+                error(2, "Variable does not start with a letter.", &unfinishedLex);
         }
         if (size_overflow || token_len > MAX_NUM_LEN)
-            error("Number is too long.", &unfinishedLex);
+            error(3, "Number is too long.", &unfinishedLex);
     }
     else if (isLatinAlpha(token[0]) && size_overflow && !is_comment)
-        error("Variable name is too long.", &unfinishedLex);
+        error(4, "Variable name is too long.", &unfinishedLex);
     else if (token_len > 1)
     {
         if (streql(token, "/*"))
@@ -68,7 +68,7 @@ int check_token(char *token, int token_len, int size_overflow, int invalid_symbo
             if (is_comment)
                 return COMMENT_END;
             else
-                error("Unexpected comment end symbol.", &unfinishedLex);
+                error(5, "Unexpected comment end symbol.", &unfinishedLex);
     }
     return 0;
 }

@@ -41,8 +41,8 @@ char *LEXEME_TYPES[] = {
     "elsesym",
 };
 
-void error(char *msg, lexeme *lex) {
-    printf("\n\nError on line %d on token '%s': %s\n", lex->line, lex->data, msg);
+void error(int errnum, char *msg, lexeme *lex) {
+    printf("\n\nError number %d on line %d on token '%s': %s\n", errnum, lex->line, lex->data, msg);
     exit(1);
 }
 

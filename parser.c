@@ -37,7 +37,7 @@ static int strToNum(char *str)
 static void nextLexeme(state *st) {
     st->cur_lex = st->lex_list[(st->next_lex_list_index)++];
     if (st->cur_lex == NULL)
-        error("Unexpectedly ran out of tokens to parse.", st->lex_list[(st->next_lex_list_index - 2)]);
+        error(28, "Unexpectedly ran out of tokens to parse.", st->lex_list[(st->next_lex_list_index - 2)]);
     log("%s", st->cur_lex->data);
 }
 
@@ -49,7 +49,7 @@ static void factor(state *st, int lex_level)
     {
         symbol *s = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
         if (s == NULL)
-            error("Undeclared identifier.", st->cur_lex);
+            error(15, "Undeclared identifier.", st->cur_lex);
         nextLexeme(st);
     }
     else if (ltype == NUMBERSYM)
@@ -59,11 +59,11 @@ static void factor(state *st, int lex_level)
         nextLexeme(st);
         expression(st, lex_level);
         if (ltype != RPARENTSYM)
-            error("Right parenthesis missing.", st->cur_lex);
+            error(26, "Right parenthesis missing.", st->cur_lex);
         nextLexeme(st);
     }
     else
-        error("The preceding factor cannot begin with this symbol.", st->cur_lex);
+        error(27, "The preceding factor cannot begin with this symbol.", st->cur_lex);
     elog("/factor()");
 }
 
@@ -106,7 +106,7 @@ static void condition(state *st, int lex_level)
         expression(st, lex_level);
         int t = ltype;
         if (t != EQLSYM && t != NEQSYM && t != LEQSYM && t != LESSYM && t != GTRSYM && t != GEQSYM)
-            error("Relational operator expected.", st->cur_lex);
+            error(26, "Relational operator expected.", st->cur_lex);
         nextLexeme(st);
         expression(st, lex_level);
     }
@@ -121,12 +121,12 @@ static void statement(state *st, int lex_level)
         symbol *sym = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
 
         if (sym == NULL)
-            error("Undeclared identifier.", st->cur_lex);
+            error(15, "Undeclared identifier.", st->cur_lex);
         if (sym->kind != SYMBOL_VAR)
-            error("Expected a variable identifier.", st->cur_lex);
+            error(16, "Expected a variable identifier.", st->cur_lex);
         nextLexeme(st);
         if (ltype != BECOMESSYM)
-            error("Assignment operator expected.", st->cur_lex);
+            error(17, "Assignment operator expected.", st->cur_lex);
         nextLexeme(st);
         expression(st, lex_level);
     }
@@ -134,9 +134,9 @@ static void statement(state *st, int lex_level)
         nextLexeme(st);
 		symbol *s = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
 		if (s == NULL)
-            error("Undeclared identifier.", st->cur_lex);
+            error(15, "Undeclared identifier.", st->cur_lex);
         if (s->kind != SYMBOL_PROC)
-            error("call must be followed by a procedure identifier.", st->cur_lex);
+            error(18, "call must be followed by a procedure identifier.", st->cur_lex);
 		nextLexeme(st);
     }
     else if (ltype == BEGINSYM)
@@ -149,7 +149,7 @@ static void statement(state *st, int lex_level)
             statement(st, lex_level);
         }
         if (ltype != ENDSYM)
-            error("Semicolon or end expected.", st->cur_lex);
+            error(19, "Semicolon or end expected.", st->cur_lex);
         nextLexeme(st);
     }
     else if (ltype == IFSYM)
@@ -157,21 +157,21 @@ static void statement(state *st, int lex_level)
         nextLexeme(st);
         condition(st, lex_level);
         if (ltype != THENSYM)
-            error("then expected.", st->cur_lex);
+            error(20, "then expected.", st->cur_lex);
         nextLexeme(st);
         if (ltype == ELSESYM)
             nextLexeme(st);
         statement(st, lex_level);
     }
     else if (ltype == THENSYM) {
-        error("Then without preceding if is prohibited.", st->cur_lex);
+        error(21, "Then without preceding if is prohibited.", st->cur_lex);
     }
     else if (ltype == WHILESYM)
     {
         nextLexeme(st);
         condition(st, lex_level);
         if (ltype != DOSYM)
-            error("do expected.", st->cur_lex);
+            error(22, "do expected.", st->cur_lex);
         nextLexeme(st);
         statement(st, lex_level);
     }
@@ -179,13 +179,13 @@ static void statement(state *st, int lex_level)
     {
         nextLexeme(st);
         if (ltype != IDENTSYM)
-            error("Read must be followed by an identifier", st->cur_lex);
+            error(23, "Read must be followed by an identifier", st->cur_lex);
         symbol *sym = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
 
         if (sym == NULL)
-            error("Undeclared identifier.", st->cur_lex);
+            error(15, "Undeclared identifier.", st->cur_lex);
         if (sym->kind != SYMBOL_VAR)
-            error("Read must be followed by a variable identifier.", st->cur_lex);
+            error(24, "Read must be followed by a variable identifier.", st->cur_lex);
         nextLexeme(st);
     }
     else if (ltype == WRITESYM)
@@ -203,18 +203,18 @@ static int procedureDeclaration(state *st, int lex_level) {
 		do {
 			nextLexeme(st);
 			if (ltype != IDENTSYM)
-				error("procedure must be followed by identifier.", st->cur_lex);
+				error(13, "procedure must be followed by identifier.", st->cur_lex);
             symbol *s = symbolTableGetByName(st->sym_table, ldata);
 			if (s != NULL && s->mark == 0 && s->level == lex_level)
-				error("The identifier is already defined in current namespace.", st->cur_lex);
+				error(8, "The identifier is already defined in current namespace.", st->cur_lex);
             symCount++;
 			addToSymbolTable(st->sym_table, st->sti++, 3, ldata, 0, 0, lex_level);
 			nextLexeme(st);
 			if (ltype != SEMICOLONSYM)
-				error("Semicolon between statements missing.", st->cur_lex);
+				error(14, "Semicolon between statements missing.", st->cur_lex);
 			block(st, lex_level + 1);
 			if (ltype != SEMICOLONSYM)
-				error("Semicolon between statements missing.", st->cur_lex);
+				error(14, "Semicolon between statements missing.", st->cur_lex);
 			nextLexeme(st);
         } while (ltype == PROCSYM);
     }
@@ -232,10 +232,10 @@ static int varDeclaration(state *st, int lex_level)
         {
             nextLexeme(st);
             if (ltype != IDENTSYM)
-                error("var must be followed by identifier.", st->cur_lex);
+                error(12, "var must be followed by identifier.", st->cur_lex);
             symbol *s = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
             if (s != NULL && s->mark == 0 && s->level == lex_level)
-                error("The identifier is already defined in current namespace.", st->cur_lex);
+                error(8, "The identifier is already defined in current namespace.", st->cur_lex);
             varcount++;
             addToSymbolTable(
                 st->sym_table, 
@@ -250,7 +250,7 @@ static int varDeclaration(state *st, int lex_level)
 
         } while (ltype == COMMASYM);
         if (ltype != SEMICOLONSYM)
-            error("Semicolon or comma missing.", st->cur_lex);
+            error(11, "Semicolon or comma missing.", st->cur_lex);
         nextLexeme(st);
     }
     elog("/varDeclaration()");
@@ -269,17 +269,17 @@ static int constDeclaration(state *st, int lex_level)
         {
             nextLexeme(st);
             if (ltype != IDENTSYM)
-                error("const, var, procedure must be followed by identifier.", st->cur_lex);
+                error(7, "const, var, procedure must be followed by identifier.", st->cur_lex);
             symbol_name = ldata;
             symbol *s = symbolTableGetByName(st->sym_table, symbol_name);
             if (s != NULL && s->mark == 0 && s->level == lex_level)
-                error("The identifier is already defined in current namespace.", st->cur_lex); 
+                error(8, "The identifier is already defined in current namespace.", st->cur_lex); 
             nextLexeme(st);
             if (ltype != EQLSYM)
-                error("Assignment operator expected.", st->cur_lex);
+                error(9, "Assignment operator expected.", st->cur_lex);
             nextLexeme(st);
             if (ltype != NUMBERSYM)
-                error("= must be followed by a number.", st->cur_lex);
+                error(10, "= must be followed by a number.", st->cur_lex);
             symbol_val = strToNum(ldata);
             constCount++;
             addToSymbolTable(
@@ -294,7 +294,7 @@ static int constDeclaration(state *st, int lex_level)
             nextLexeme(st);
         } while (ltype == COMMASYM);
         if (ltype != SEMICOLONSYM)
-            error("Semicolon or comma missing.", st->cur_lex);
+            error(11, "Semicolon or comma missing.", st->cur_lex);
         nextLexeme(st);
     }
     elog("/constDeclaration()");
@@ -335,6 +335,6 @@ symbol **buildSymbolTable(lexeme **lex_list)
     addToSymbolTable(symbol_table, st.sti++, SYMBOL_PROC, "main", 0, 0, 0);
 	block(&st, 0);
     if (st.cur_lex->type != PERIODSYM)
-        error("Period expected.", st.cur_lex);
+        error(6, "Period expected.", st.cur_lex);
     return symbol_table;
 }

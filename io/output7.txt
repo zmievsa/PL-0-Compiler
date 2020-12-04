@@ -104,4 +104,4 @@ procsym identsym show1 semicolonsym writesym numbersym 1 semicolonsym procsym id
 
 
 
-Error on line 9 on token 'procedure': Semicolon between statements missing.
+Error number 14 on line 9 on token 'procedure': Semicolon between statements missing.
