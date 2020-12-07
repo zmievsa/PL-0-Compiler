@@ -1,0 +1,11 @@
+const fail = -1, pass = 1;
+var value;
+begin
+	read value;
+	if value < 60 then
+		write fail
+	else
+		write pass;
+end.
+
+/*Ensures else statements work.*/

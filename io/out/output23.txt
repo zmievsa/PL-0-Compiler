@@ -1,0 +1,157 @@
+Input file:
+procedure test;
+	var a;
+	begin
+		read a;
+		a := a + 1;
+		write a;
+	end;
+begin
+	call test;
+	write 2;
+end.
+
+/*Using variables in procedures.*/
+
+Lexeme Table:
+lexeme		token type
+procedure		30
+test		2
+;		18
+var		29
+a		2
+;		18
+begin		21
+read		32
+a		2
+;		18
+a		2
+:=		20
+a		2
++		4
+1		3
+;		18
+write		31
+a		2
+;		18
+end		22
+;		18
+begin		21
+call		27
+test		2
+;		18
+write		31
+2		3
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+30 2 test 18 29 2 a 18 21 32 2 a 18 2 a 20 2 a 4 3 1 18 31 2 a 18 22 18 21 27 2 test 18 31 3 2 18 22 19 
+
+Formatted Lexeme List:
+procsym identsym test semicolonsym varsym identsym a semicolonsym beginsym readsym identsym a semicolonsym identsym a becomessym identsym a plussym numbersym 1 semicolonsym writesym identsym a semicolonsym endsym semicolonsym beginsym callsym identsym test semicolonsym writesym numbersym 2 semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	12
+1	JMP	0	0	2
+2	INC	0	0	4
+3	SIO	0	0	2
+4	STO	0	0	3
+5	LOD	0	0	3
+6	LIT	1	0	1
+7	ADD	0	0	1
+8	STO	0	0	3
+9	LOD	0	0	3
+10	SIO	0	0	1
+11	RTN	0	0	0
+12	INC	0	0	3
+13	CAL	0	0	2
+14	LIT	0	0	2
+15	SIO	0	0	1
+16	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 12			12	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+12 inc 0 0 3			13	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+13 cal 0 0 2			2	996	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+2 inc 0 0 4			3	996	993
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 0
+
+
+Please enter an integer: 
+3 sio 0 0 2			4	996	993
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 0
+
+4 sto 0 0 3			5	996	993
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 4
+
+5 lod 0 0 3			6	996	993
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 4
+
+6 lit 1 0 1			7	996	993
+Registers: 4 1 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 4
+
+7 add 0 0 1			8	996	993
+Registers: 5 1 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 4
+
+8 sto 0 0 3			9	996	993
+Registers: 5 1 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 5
+
+9 lod 0 0 3			10	996	993
+Registers: 5 1 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 5
+
+
+Register 0: 5
+
+10 sio 0 0 1			11	996	993
+Registers: 5 1 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 5
+
+11 rtn 0 0 0			14	999	997
+Registers: 5 1 0 0 0 0 0 0
+Stack: 0 0 0
+
+14 lit 0 0 2			15	999	997
+Registers: 2 1 0 0 0 0 0 0
+Stack: 0 0 0
+
+
+Register 0: 2
+
+15 sio 0 0 1			16	999	997
+Registers: 2 1 0 0 0 0 0 0
+Stack: 0 0 0
+
+16 sio 0 0 3			17	999	997
+Registers: 2 1 0 0 0 0 0 0
+Stack: 0 0 0
+

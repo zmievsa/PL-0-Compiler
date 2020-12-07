@@ -1,0 +1,112 @@
+Input file:
+var a, b;
+begin
+	read a;
+	read b;
+	write a + b;
+end.
+
+Lexeme Table:
+lexeme		token type
+var		29
+a		2
+,		17
+b		2
+;		18
+begin		21
+read		32
+a		2
+;		18
+read		32
+b		2
+;		18
+write		31
+a		2
++		4
+b		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 a 17 2 b 18 21 32 2 a 18 32 2 b 18 31 2 a 4 2 b 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym a commasym identsym b semicolonsym beginsym readsym identsym a semicolonsym readsym identsym b semicolonsym writesym identsym a plussym identsym b semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	1
+1	INC	0	0	5
+2	SIO	0	0	2
+3	STO	0	0	3
+4	SIO	0	0	2
+5	STO	0	0	4
+6	LOD	0	0	3
+7	LOD	1	0	4
+8	ADD	0	0	1
+9	SIO	0	0	1
+10	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 1			1	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+1 inc 0 0 5			2	999	995
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0
+
+
+Please enter an integer: 
+2 sio 0 0 2			3	999	995
+Registers: 6 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0
+
+3 sto 0 0 3			4	999	995
+Registers: 6 0 0 0 0 0 0 0
+Stack: 0 0 0 6 0
+
+
+Please enter an integer: 
+4 sio 0 0 2			5	999	995
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 6 0
+
+5 sto 0 0 4			6	999	995
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 6 5
+
+6 lod 0 0 3			7	999	995
+Registers: 6 0 0 0 0 0 0 0
+Stack: 0 0 0 6 5
+
+7 lod 1 0 4			8	999	995
+Registers: 6 5 0 0 0 0 0 0
+Stack: 0 0 0 6 5
+
+8 add 0 0 1			9	999	995
+Registers: 11 5 0 0 0 0 0 0
+Stack: 0 0 0 6 5
+
+
+Register 0: 11
+
+9 sio 0 0 1			10	999	995
+Registers: 11 5 0 0 0 0 0 0
+Stack: 0 0 0 6 5
+
+10 sio 0 0 3			11	999	995
+Registers: 11 5 0 0 0 0 0 0
+Stack: 0 0 0 6 5
+

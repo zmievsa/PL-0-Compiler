@@ -1,0 +1,96 @@
+Input file:
+var i;
+begin
+	read i;
+	write i * i;
+end.
+
+/* Check if write accepts expressions.*/
+
+Lexeme Table:
+lexeme		token type
+var		29
+i		2
+;		18
+begin		21
+read		32
+i		2
+;		18
+write		31
+i		2
+*		6
+i		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 i 18 21 32 2 i 18 31 2 i 6 2 i 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym i semicolonsym beginsym readsym identsym i semicolonsym writesym identsym i multsym identsym i semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	1
+1	INC	0	0	4
+2	SIO	0	0	2
+3	STO	0	0	3
+4	LOD	0	0	3
+5	LOD	1	0	3
+6	MUL	0	0	1
+7	SIO	0	0	1
+8	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 1			1	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+1 inc 0 0 4			2	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+
+Please enter an integer: 
+2 sio 0 0 2			3	999	996
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+3 sto 0 0 3			4	999	996
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+4 lod 0 0 3			5	999	996
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+5 lod 1 0 3			6	999	996
+Registers: 5 5 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+6 mul 0 0 1			7	999	996
+Registers: 25 5 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+
+Register 0: 25
+
+7 sio 0 0 1			8	999	996
+Registers: 25 5 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+8 sio 0 0 3			9	999	996
+Registers: 25 5 0 0 0 0 0 0
+Stack: 0 0 0 5
+

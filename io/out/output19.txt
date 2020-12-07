@@ -1,0 +1,96 @@
+Input file:
+const a = 1;
+procedure noOp;
+	; /* Do nothing. */
+begin
+	call noOp;
+	write a;
+end.
+
+/* The absolute minimum a function can do. */
+
+Lexeme Table:
+lexeme		token type
+const		28
+a		2
+=		9
+1		3
+;		18
+procedure		30
+noOp		2
+;		18
+;		18
+begin		21
+call		27
+noOp		2
+;		18
+write		31
+a		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+28 2 a 9 3 1 18 30 2 noOp 18 18 21 27 2 noOp 18 31 2 a 18 22 19 
+
+Formatted Lexeme List:
+constsym identsym a eqlsym numbersym 1 semicolonsym procsym identsym noOp semicolonsym semicolonsym beginsym callsym identsym noOp semicolonsym writesym identsym a semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	4
+1	JMP	0	0	2
+2	INC	0	0	3
+3	RTN	0	0	0
+4	INC	0	0	3
+5	CAL	0	0	2
+6	LIT	0	0	1
+7	SIO	0	0	1
+8	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 4			4	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+4 inc 0 0 3			5	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+5 cal 0 0 2			2	996	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+2 inc 0 0 3			3	996	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 6
+
+3 rtn 0 0 0			6	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+6 lit 0 0 1			7	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+
+Register 0: 1
+
+7 sio 0 0 1			8	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+8 sio 0 0 3			9	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+

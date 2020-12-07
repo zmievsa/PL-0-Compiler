@@ -1,0 +1,15 @@
+const password = 6174;
+procedure a;
+	var a;
+	begin
+		read a;
+		if a <> password then call a;
+	end;
+begin
+	call a;
+	write 1;
+end.
+
+/* Repeatedly accept input until the password is entered.
+Here, there is a procedure a and a var a, with the var coming second, and the compiler
+needs to tell them apart. */

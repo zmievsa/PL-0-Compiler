@@ -1,0 +1,20 @@
+var sum, b;
+procedure getB;
+	begin
+		sum := 0;
+		read b;
+	end;
+procedure getSum;
+	var a;
+	begin
+		read a;
+		call getB;
+		sum := a + b;
+	end;
+begin
+	sum := 1;
+	call getSum;
+	write sum;
+end.
+
+/*Functions can also call functions of their ancestors (hence why CAL has an L).*/

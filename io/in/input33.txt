@@ -1,0 +1,11 @@
+var a;
+procedure test;
+	begin
+		read a;
+	end;
+begin
+	call test;
+	write a;
+end.
+
+/*Procedures can use their ancestors' variables. */

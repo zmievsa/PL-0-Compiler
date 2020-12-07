@@ -1,0 +1,18 @@
+var sum;
+procedure buffer;
+	var a;
+	procedure sum;
+		begin
+			read sum;
+			read a;
+			sum := sum + a;
+		end;
+	begin
+		call sum;
+	end;
+begin
+	call buffer;
+	write sum;
+end.
+/* Add together two inputs.
+With this one, the procedure sum comes after the variable sum, and it needs to tell them apart.*/

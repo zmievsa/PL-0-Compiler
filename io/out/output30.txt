@@ -1,0 +1,37 @@
+Input file:
+var a;
+procedure a;
+	;
+begin
+	write 0;
+end.
+
+/* A variable and procedure of the same name on the same level should cause an error. */
+
+
+Lexeme Table:
+lexeme		token type
+var		29
+a		2
+;		18
+procedure		30
+a		2
+;		18
+;		18
+begin		21
+write		31
+0		3
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 a 18 30 2 a 18 18 21 31 3 0 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym a semicolonsym procsym identsym a semicolonsym semicolonsym beginsym writesym numbersym 0 semicolonsym endsym periodsym 
+
+
+
+Error number 8 on line 2 on token 'a': The identifier is already defined in current namespace.

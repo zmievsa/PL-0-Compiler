@@ -1,0 +1,33 @@
+Input file:
+const negative = -1;
+begin
+	write negative;
+end.
+
+/* Oops, forgot to account for negative constants in HW3. */
+
+Lexeme Table:
+lexeme		token type
+const		28
+negative		2
+=		9
+-		5
+1		3
+;		18
+begin		21
+write		31
+negative		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+28 2 negative 9 5 3 1 18 21 31 2 negative 18 22 19 
+
+Formatted Lexeme List:
+constsym identsym negative eqlsym minussym numbersym 1 semicolonsym beginsym writesym identsym negative semicolonsym endsym periodsym 
+
+
+
+Error number 10 on line 1 on token '-': = must be followed by a number.

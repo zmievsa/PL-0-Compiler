@@ -1,0 +1,190 @@
+Input file:
+var a;
+procedure dummy1;
+	begin
+		read a;
+		if a > 0 then write a;
+	end;
+procedure dummy2;
+	; /* Do nothing. */
+procedure dummy3;
+	; /* Do nothing. */
+begin
+	call dummy1;
+	call dummy2;
+	write 0;
+end.
+
+/* Checking if I relocate stuff properly. */
+
+Lexeme Table:
+lexeme		token type
+var		29
+a		2
+;		18
+procedure		30
+dummy1		2
+;		18
+begin		21
+read		32
+a		2
+;		18
+if		23
+a		2
+>		13
+0		3
+then		24
+write		31
+a		2
+;		18
+end		22
+;		18
+procedure		30
+dummy2		2
+;		18
+;		18
+procedure		30
+dummy3		2
+;		18
+;		18
+begin		21
+call		27
+dummy1		2
+;		18
+call		27
+dummy2		2
+;		18
+write		31
+0		3
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 a 18 30 2 dummy1 18 21 32 2 a 18 23 2 a 13 3 0 24 31 2 a 18 22 18 30 2 dummy2 18 18 30 2 dummy3 18 18 21 27 2 dummy1 18 27 2 dummy2 18 31 3 0 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym a semicolonsym procsym identsym dummy1 semicolonsym beginsym readsym identsym a semicolonsym ifsym identsym a gtrsym numbersym 0 thensym writesym identsym a semicolonsym endsym semicolonsym procsym identsym dummy2 semicolonsym semicolonsym procsym identsym dummy3 semicolonsym semicolonsym beginsym callsym identsym dummy1 semicolonsym callsym identsym dummy2 semicolonsym writesym numbersym 0 semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	18
+1	JMP	0	0	4
+2	JMP	0	0	14
+3	JMP	0	0	16
+4	INC	0	0	3
+5	SIO	0	0	2
+6	STO	0	1	3
+7	LOD	0	1	3
+8	LIT	1	0	0
+9	GTR	0	0	1
+10	JPC	0	0	13
+11	LOD	0	1	3
+12	SIO	0	0	1
+13	RTN	0	0	0
+14	INC	0	0	3
+15	RTN	0	0	0
+16	INC	0	0	3
+17	RTN	0	0	0
+18	INC	0	0	4
+19	CAL	0	0	4
+20	CAL	0	0	14
+21	LIT	0	0	0
+22	SIO	0	0	1
+23	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 18			18	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+18 inc 0 0 4			19	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+19 cal 0 0 4			4	995	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+4 inc 0 0 3			5	995	993
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 999 | 999 20
+
+
+Please enter an integer: 
+5 sio 0 0 2			6	995	993
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 0 999 | 999 20
+
+6 sto 0 1 3			7	995	993
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 20
+
+7 lod 0 1 3			8	995	993
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 20
+
+8 lit 1 0 0			9	995	993
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 20
+
+9 gtr 0 0 1			10	995	993
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 20
+
+10 jpc 0 0 13			11	995	993
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 20
+
+11 lod 0 1 3			12	995	993
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 20
+
+
+Register 0: 5
+
+12 sio 0 0 1			13	995	993
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 20
+
+13 rtn 0 0 0			20	999	996
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+20 cal 0 0 14			14	995	996
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+14 inc 0 0 3			15	995	993
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 21
+
+15 rtn 0 0 0			21	999	996
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+21 lit 0 0 0			22	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+
+Register 0: 0
+
+22 sio 0 0 1			23	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+
+23 sio 0 0 3			24	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 5
+

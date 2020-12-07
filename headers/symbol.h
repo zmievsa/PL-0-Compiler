@@ -26,6 +26,7 @@ void printSymbolTable(symbol **table);
 symbol *symbolTableGetByName(symbol **sym_table, char *name);
 symbol *symbolTableGetProcByValue(symbol **sym_table, int val);
 symbol *searchSymbolTableBackwards(symbol **sym_table, char *name, int current_size);
+symbol *searchSymbolTableBackwardsByKind(symbol **sym_table, char *name, int current_size, int kind);
 
 int symbolTableContains(symbol **sym_table, char *name);
 

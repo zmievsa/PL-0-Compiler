@@ -1,0 +1,70 @@
+Input file:
+var a, b, max;
+procedure max;
+	begin
+		max := a;
+		if b > max then max := b;
+	end;
+begin
+	read a;
+	read b;
+	call max;
+	write max;
+end.
+
+/*Should err because of proc max and var max at same level.*/
+
+Lexeme Table:
+lexeme		token type
+var		29
+a		2
+,		17
+b		2
+,		17
+max		2
+;		18
+procedure		30
+max		2
+;		18
+begin		21
+max		2
+:=		20
+a		2
+;		18
+if		23
+b		2
+>		13
+max		2
+then		24
+max		2
+:=		20
+b		2
+;		18
+end		22
+;		18
+begin		21
+read		32
+a		2
+;		18
+read		32
+b		2
+;		18
+call		27
+max		2
+;		18
+write		31
+max		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 a 17 2 b 17 2 max 18 30 2 max 18 21 2 max 20 2 a 18 23 2 b 13 2 max 24 2 max 20 2 b 18 22 18 21 32 2 a 18 32 2 b 18 27 2 max 18 31 2 max 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym a commasym identsym b commasym identsym max semicolonsym procsym identsym max semicolonsym beginsym identsym max becomessym identsym a semicolonsym ifsym identsym b gtrsym identsym max thensym identsym max becomessym identsym b semicolonsym endsym semicolonsym beginsym readsym identsym a semicolonsym readsym identsym b semicolonsym callsym identsym max semicolonsym writesym identsym max semicolonsym endsym periodsym 
+
+
+
+Error number 8 on line 2 on token 'max': The identifier is already defined in current namespace.

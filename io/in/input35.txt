@@ -1,0 +1,17 @@
+var a;
+procedure dummy1;
+	begin
+		read a;
+		if a > 0 then write a;
+	end;
+procedure dummy2;
+	; /* Do nothing. */
+procedure dummy3;
+	; /* Do nothing. */
+begin
+	call dummy1;
+	call dummy2;
+	write 0;
+end.
+
+/* Checking if I relocate stuff properly. */

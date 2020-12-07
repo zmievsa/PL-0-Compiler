@@ -1,0 +1,104 @@
+Input file:
+procedure test;
+	write 1; 
+begin
+	call test;
+	write 2;
+end.
+/* Now see if my procedures can do stuff. */
+
+Lexeme Table:
+lexeme		token type
+procedure		30
+test		2
+;		18
+write		31
+1		3
+;		18
+begin		21
+call		27
+test		2
+;		18
+write		31
+2		3
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+30 2 test 18 31 3 1 18 21 27 2 test 18 31 3 2 18 22 19 
+
+Formatted Lexeme List:
+procsym identsym test semicolonsym writesym numbersym 1 semicolonsym beginsym callsym identsym test semicolonsym writesym numbersym 2 semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	6
+1	JMP	0	0	2
+2	INC	0	0	3
+3	LIT	0	0	1
+4	SIO	0	0	1
+5	RTN	0	0	0
+6	INC	0	0	3
+7	CAL	0	0	2
+8	LIT	0	0	2
+9	SIO	0	0	1
+10	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 6			6	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+6 inc 0 0 3			7	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+7 cal 0 0 2			2	996	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+2 inc 0 0 3			3	996	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 8
+
+3 lit 0 0 1			4	996	994
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 8
+
+
+Register 0: 1
+
+4 sio 0 0 1			5	996	994
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 8
+
+5 rtn 0 0 0			8	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+8 lit 0 0 2			9	999	997
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+
+Register 0: 2
+
+9 sio 0 0 1			10	999	997
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+10 sio 0 0 3			11	999	997
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0
+

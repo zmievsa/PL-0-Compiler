@@ -1,0 +1,15 @@
+var sum;
+procedure a;
+	var a;
+	begin
+		read a;
+		sum := sum + a;
+		if a <> 0 then call a;
+	end;
+begin
+	call a;
+	write sum;
+end.
+
+/* Expands on test2 by making it sum all the inputs iuntil you enter 0, thus making sure 
+it's looking for the correct a each time when there's a bunch of them. */

@@ -1,0 +1,9 @@
+var a;
+procedure b;
+	var b;
+	;
+begin
+	write b;
+end.
+
+/* Should complain var b doesn't exist, and ignore the proc b and the var b out of scope. */

@@ -114,11 +114,12 @@ Error number 14 on line 1 on token '.': Semicolon between statements missing.
 
 /// Error 15:
 Input file:
-b := 2.
+var b;
+b := a.
 
 
 
-Error number 15 on line 1 on token 'b': Undeclared identifier.
+Error number 15 on line 2 on token 'a': Undeclared identifier.
 
 /// Error 16:
 Input file:

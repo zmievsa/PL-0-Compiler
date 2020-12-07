@@ -47,9 +47,12 @@ static void factor(state *st, int lex_level)
 
     if (ltype == IDENTSYM)
     {
-        symbol *s = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
-        if (s == NULL)
-            error(15, "Undeclared identifier.", st->cur_lex);
+        symbol *s = searchSymbolTableBackwardsByKind(st->sym_table, ldata, st->sti, SYMBOL_CONST);
+        if (s == NULL) {
+            s = searchSymbolTableBackwardsByKind(st->sym_table, ldata, st->sti, SYMBOL_VAR);
+            if (s == NULL)
+                error(15, "Undeclared identifier.", st->cur_lex);
+        }
         nextLexeme(st);
     }
     else if (ltype == NUMBERSYM)
@@ -118,11 +121,9 @@ static void statement(state *st, int lex_level)
     elog("statement()");
     if (ltype == IDENTSYM)
     {
-        symbol *sym = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
+        symbol *sym = searchSymbolTableBackwardsByKind(st->sym_table, ldata, st->sti, SYMBOL_VAR);
 
         if (sym == NULL)
-            error(15, "Undeclared identifier.", st->cur_lex);
-        if (sym->kind != SYMBOL_VAR)
             error(16, "Expected a variable identifier.", st->cur_lex);
         nextLexeme(st);
         if (ltype != BECOMESSYM)
@@ -132,10 +133,8 @@ static void statement(state *st, int lex_level)
     }
     else if (ltype == CALLSYM) {
         nextLexeme(st);
-		symbol *s = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
-		if (s == NULL)
-            error(15, "Undeclared identifier.", st->cur_lex);
-        if (s->kind != SYMBOL_PROC)
+		symbol *s = searchSymbolTableBackwardsByKind(st->sym_table, ldata, st->sti, SYMBOL_PROC);
+        if (s == NULL)
             error(18, "call must be followed by a procedure identifier.", st->cur_lex);
 		nextLexeme(st);
     }
@@ -180,10 +179,8 @@ static void statement(state *st, int lex_level)
         nextLexeme(st);
         if (ltype != IDENTSYM)
             error(23, "Read must be followed by an identifier", st->cur_lex);
-        symbol *sym = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
+        symbol *sym = searchSymbolTableBackwardsByKind(st->sym_table, ldata, st->sti, SYMBOL_VAR);
 
-        if (sym == NULL)
-            error(15, "Undeclared identifier.", st->cur_lex);
         if (sym->kind != SYMBOL_VAR)
             error(24, "Read must be followed by a variable identifier.", st->cur_lex);
         nextLexeme(st);
@@ -204,7 +201,7 @@ static int procedureDeclaration(state *st, int lex_level) {
 			nextLexeme(st);
 			if (ltype != IDENTSYM)
 				error(13, "procedure must be followed by identifier.", st->cur_lex);
-            symbol *s = symbolTableGetByName(st->sym_table, ldata);
+            symbol *s = searchSymbolTableBackwards(st->sym_table, ldata, st->sti);
 			if (s != NULL && s->mark == 0 && s->level == lex_level)
 				error(8, "The identifier is already defined in current namespace.", st->cur_lex);
             symCount++;
@@ -271,7 +268,7 @@ static int constDeclaration(state *st, int lex_level)
             if (ltype != IDENTSYM)
                 error(7, "const, var, procedure must be followed by identifier.", st->cur_lex);
             symbol_name = ldata;
-            symbol *s = symbolTableGetByName(st->sym_table, symbol_name);
+            symbol *s = searchSymbolTableBackwards(st->sym_table, symbol_name, st->sti);
             if (s != NULL && s->mark == 0 && s->level == lex_level)
                 error(8, "The identifier is already defined in current namespace.", st->cur_lex); 
             nextLexeme(st);
@@ -311,6 +308,7 @@ static void block(state *st, int lex_level)
     symCount += varDeclaration(st, lex_level);
     symCount += procedureDeclaration(st, lex_level);
     statement(st, lex_level);
+    log("\nsymCount: %d\n", symCount);
     for (int i = old_sti; i < symCount + old_sti; i++) {
         symbol *sym = st->sym_table[i];
         sym->mark = 1;

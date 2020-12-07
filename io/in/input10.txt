@@ -1,0 +1,7 @@
+var i;
+begin
+	read i;
+	write i * i;
+end.
+
+/* Check if write accepts expressions.*/

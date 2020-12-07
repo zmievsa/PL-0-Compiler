@@ -1,0 +1,37 @@
+Input file:
+var a;
+procedure b;
+	;
+begin
+	write b;
+end.
+
+/* Should complain var b doesn't exist, and ignore the proc b. */
+
+
+Lexeme Table:
+lexeme		token type
+var		29
+a		2
+;		18
+procedure		30
+b		2
+;		18
+;		18
+begin		21
+write		31
+b		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 a 18 30 2 b 18 18 21 31 2 b 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym a semicolonsym procsym identsym b semicolonsym semicolonsym beginsym writesym identsym b semicolonsym endsym periodsym 
+
+
+
+Error number 15 on line 5 on token 'b': Undeclared identifier.

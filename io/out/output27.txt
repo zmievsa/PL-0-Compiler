@@ -1,0 +1,37 @@
+Input file:
+var a;
+procedure b;
+	;
+begin
+	call a;
+end.
+
+/* Should complain proc a doesn't exist, and ignore the var a. */
+
+
+Lexeme Table:
+lexeme		token type
+var		29
+a		2
+;		18
+procedure		30
+b		2
+;		18
+;		18
+begin		21
+call		27
+a		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 a 18 30 2 b 18 18 21 27 2 a 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym a semicolonsym procsym identsym b semicolonsym semicolonsym beginsym callsym identsym a semicolonsym endsym periodsym 
+
+
+
+Error number 18 on line 5 on token 'a': call must be followed by a procedure identifier.

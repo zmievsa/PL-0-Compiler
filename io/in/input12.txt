@@ -1,0 +1,6 @@
+const negative = -1;
+begin
+	write negative;
+end.
+
+/* Oops, forgot to account for negative constants in HW3. */

@@ -1,0 +1,9 @@
+const a = 1;
+procedure noOp;
+	; /* Do nothing. */
+begin
+	call noOp;
+	write a;
+end.
+
+/* The absolute minimum a function can do. */

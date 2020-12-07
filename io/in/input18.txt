@@ -1,0 +1,41 @@
+var a;
+procedure dummy1;
+	begin
+		read a;
+		if a > 0 then write a;
+	end;
+procedure dummy2;
+	procedure dummy3;
+		procedure dummy4;
+			begin
+				if 1 > 0 then
+					begin
+						call dummy4;
+						call dummy3;
+						call dummy2;
+						call dummy1;
+					end;
+			end;
+		begin
+			if 1 < 0 then
+				begin
+					call dummy3;
+					call dummy2;
+					call dummy1;
+				end;
+		end;
+	begin
+		if 1 < 0 then
+			begin
+				call dummy2;
+				call dummy1;
+			end;
+	end;
+
+begin
+	call dummy1;
+	call dummy2;
+	write 0;
+end.
+
+/* Really torturing my relocator. */

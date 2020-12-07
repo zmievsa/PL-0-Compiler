@@ -1,0 +1,125 @@
+Input file:
+procedure dummy1;
+	; /* Do nothing. */
+procedure dummy2;
+	; /* Do nothing. */
+procedure dummy3;
+	; /* Do nothing. */
+begin
+	call dummy1;
+	call dummy2;
+	write 0;
+end.
+
+/* Checking if I relocate stuff properly. */
+
+Lexeme Table:
+lexeme		token type
+procedure		30
+dummy1		2
+;		18
+;		18
+procedure		30
+dummy2		2
+;		18
+;		18
+procedure		30
+dummy3		2
+;		18
+;		18
+begin		21
+call		27
+dummy1		2
+;		18
+call		27
+dummy2		2
+;		18
+write		31
+0		3
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+30 2 dummy1 18 18 30 2 dummy2 18 18 30 2 dummy3 18 18 21 27 2 dummy1 18 27 2 dummy2 18 31 3 0 18 22 19 
+
+Formatted Lexeme List:
+procsym identsym dummy1 semicolonsym semicolonsym procsym identsym dummy2 semicolonsym semicolonsym procsym identsym dummy3 semicolonsym semicolonsym beginsym callsym identsym dummy1 semicolonsym callsym identsym dummy2 semicolonsym writesym numbersym 0 semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	10
+1	JMP	0	0	4
+2	JMP	0	0	6
+3	JMP	0	0	8
+4	INC	0	0	3
+5	RTN	0	0	0
+6	INC	0	0	3
+7	RTN	0	0	0
+8	INC	0	0	3
+9	RTN	0	0	0
+10	INC	0	0	3
+11	CAL	0	0	4
+12	CAL	0	0	6
+13	LIT	0	0	0
+14	SIO	0	0	1
+15	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 10			10	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+10 inc 0 0 3			11	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+11 cal 0 0 4			4	996	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+4 inc 0 0 3			5	996	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 12
+
+5 rtn 0 0 0			12	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+12 cal 0 0 6			6	996	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+6 inc 0 0 3			7	996	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 13
+
+7 rtn 0 0 0			13	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+13 lit 0 0 0			14	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+
+Register 0: 0
+
+14 sio 0 0 1			15	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+15 sio 0 0 3			16	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+

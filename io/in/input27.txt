@@ -1,0 +1,8 @@
+var a;
+procedure b;
+	;
+begin
+	call a;
+end.
+
+/* Should complain proc a doesn't exist, and ignore the var a. */

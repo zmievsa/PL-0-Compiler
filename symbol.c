@@ -55,6 +55,15 @@ symbol *searchSymbolTableBackwards(symbol **sym_table, char *name, int current_s
     return NULL;
 }
 
+symbol *searchSymbolTableBackwardsByKind(symbol **sym_table, char *name, int current_size, int kind) {
+    for (int i = 1; i <= current_size; i++) {
+        symbol *sym = sym_table[current_size - i];
+        if (streql(sym->name, name) && sym->mark == 0 && sym->kind == kind)
+            return sym;
+    }
+    return NULL;
+}
+
 void addToSymbolTable(symbol **sym_table, int next_sym_table_index, int kind, char *name, int val, int addr, int level)
 {
     symbol *sym = malloc(sizeof(symbol));

@@ -1,0 +1,8 @@
+var a;
+procedure a;
+	;
+begin
+	write 0;
+end.
+
+/* A variable and procedure of the same name on the same level should cause an error. */

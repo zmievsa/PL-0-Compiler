@@ -1,0 +1,20 @@
+var sum;
+procedure getSum;
+	var a, b;
+	procedure getB;
+		begin
+			sum := 0;
+			read b;
+		end;
+	begin
+		read a;
+		call getB;
+		sum := a + b;
+	end;
+begin
+	sum := 1;
+	call getSum;
+	write sum;
+end.
+
+/*Now testing nested functions.*/

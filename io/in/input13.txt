@@ -1,0 +1,14 @@
+var a, b, max;
+procedure max;
+	begin
+		max := a;
+		if b > max then max := b;
+	end;
+begin
+	read a;
+	read b;
+	call max;
+	write max;
+end.
+
+/*Should err because of proc max and var max at same level.*/

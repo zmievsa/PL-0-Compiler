@@ -1,0 +1,13 @@
+var a;
+procedure test;
+	const b = 1;
+	begin
+		a := a + b;
+	end;
+begin
+	read a;
+	call test;
+	write a;
+end.
+
+/* Using vars from multiple lex levels. */

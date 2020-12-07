@@ -1,0 +1,298 @@
+Input file:
+procedure show1;
+	write 1;
+procedure chain1;
+	procedure show2;
+		write 2;
+	procedure chain2;
+		procedure show3;
+			write 3;
+		procedure chain3;
+			procedure show4;
+				write 4;
+			begin
+				call show4;
+				call show3;
+				call show2;
+				call show1;
+			end;
+		begin
+			call chain3;
+		end;
+	begin
+		call chain2;
+	end;
+begin
+	call chain1;
+end.
+
+/* This should better show if I'm doing it right. */
+
+Lexeme Table:
+lexeme		token type
+procedure		30
+show1		2
+;		18
+write		31
+1		3
+;		18
+procedure		30
+chain1		2
+;		18
+procedure		30
+show2		2
+;		18
+write		31
+2		3
+;		18
+procedure		30
+chain2		2
+;		18
+procedure		30
+show3		2
+;		18
+write		31
+3		3
+;		18
+procedure		30
+chain3		2
+;		18
+procedure		30
+show4		2
+;		18
+write		31
+4		3
+;		18
+begin		21
+call		27
+show4		2
+;		18
+call		27
+show3		2
+;		18
+call		27
+show2		2
+;		18
+call		27
+show1		2
+;		18
+end		22
+;		18
+begin		21
+call		27
+chain3		2
+;		18
+end		22
+;		18
+begin		21
+call		27
+chain2		2
+;		18
+end		22
+;		18
+begin		21
+call		27
+chain1		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+30 2 show1 18 31 3 1 18 30 2 chain1 18 30 2 show2 18 31 3 2 18 30 2 chain2 18 30 2 show3 18 31 3 3 18 30 2 chain3 18 30 2 show4 18 31 3 4 18 21 27 2 show4 18 27 2 show3 18 27 2 show2 18 27 2 show1 18 22 18 21 27 2 chain3 18 22 18 21 27 2 chain2 18 22 18 21 27 2 chain1 18 22 19 
+
+Formatted Lexeme List:
+procsym identsym show1 semicolonsym writesym numbersym 1 semicolonsym procsym identsym chain1 semicolonsym procsym identsym show2 semicolonsym writesym numbersym 2 semicolonsym procsym identsym chain2 semicolonsym procsym identsym show3 semicolonsym writesym numbersym 3 semicolonsym procsym identsym chain3 semicolonsym procsym identsym show4 semicolonsym writesym numbersym 4 semicolonsym beginsym callsym identsym show4 semicolonsym callsym identsym show3 semicolonsym callsym identsym show2 semicolonsym callsym identsym show1 semicolonsym endsym semicolonsym beginsym callsym identsym chain3 semicolonsym endsym semicolonsym beginsym callsym identsym chain2 semicolonsym endsym semicolonsym beginsym callsym identsym chain1 semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	36
+1	JMP	0	0	8
+2	JMP	0	0	33
+3	JMP	0	0	12
+4	JMP	0	0	30
+5	JMP	0	0	16
+6	JMP	0	0	24
+7	JMP	0	0	20
+8	INC	0	0	3
+9	LIT	0	0	1
+10	SIO	0	0	1
+11	RTN	0	0	0
+12	INC	0	0	3
+13	LIT	0	0	2
+14	SIO	0	0	1
+15	RTN	0	0	0
+16	INC	0	0	3
+17	LIT	0	0	3
+18	SIO	0	0	1
+19	RTN	0	0	0
+20	INC	0	0	3
+21	LIT	0	0	4
+22	SIO	0	0	1
+23	RTN	0	0	0
+24	INC	0	0	3
+25	CAL	0	0	20
+26	CAL	0	1	16
+27	CAL	0	2	12
+28	CAL	0	3	8
+29	RTN	0	0	0
+30	INC	0	0	3
+31	CAL	0	0	24
+32	RTN	0	0	0
+33	INC	0	0	3
+34	CAL	0	0	30
+35	RTN	0	0	0
+36	INC	0	0	3
+37	CAL	0	0	33
+38	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 36			36	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+36 inc 0 0 3			37	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+37 cal 0 0 33			33	996	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+33 inc 0 0 3			34	996	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38
+
+34 cal 0 0 30			30	993	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38
+
+30 inc 0 0 3			31	993	991
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35
+
+31 cal 0 0 24			24	990	991
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35
+
+24 inc 0 0 3			25	990	988
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+25 cal 0 0 20			20	987	988
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+20 inc 0 0 3			21	987	985
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 990 990 26
+
+21 lit 0 0 4			22	987	985
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 990 990 26
+
+
+Register 0: 4
+
+22 sio 0 0 1			23	987	985
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 990 990 26
+
+23 rtn 0 0 0			26	990	988
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+26 cal 0 1 16			16	987	988
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+16 inc 0 0 3			17	987	985
+Registers: 4 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 993 990 27
+
+17 lit 0 0 3			18	987	985
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 993 990 27
+
+
+Register 0: 3
+
+18 sio 0 0 1			19	987	985
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 993 990 27
+
+19 rtn 0 0 0			27	990	988
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+27 cal 0 2 12			12	987	988
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+12 inc 0 0 3			13	987	985
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 996 990 28
+
+13 lit 0 0 2			14	987	985
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 996 990 28
+
+
+Register 0: 2
+
+14 sio 0 0 1			15	987	985
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 996 990 28
+
+15 rtn 0 0 0			28	990	988
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+28 cal 0 3 8			8	987	988
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+8 inc 0 0 3			9	987	985
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 999 990 29
+
+9 lit 0 0 1			10	987	985
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 999 990 29
+
+
+Register 0: 1
+
+10 sio 0 0 1			11	987	985
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32 999 990 29
+
+11 rtn 0 0 0			29	990	988
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35 993 | 993 32
+
+29 rtn 0 0 0			32	993	991
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38 996 996 35
+
+32 rtn 0 0 0			35	996	994
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 38
+
+35 rtn 0 0 0			38	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+38 sio 0 0 3			39	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+

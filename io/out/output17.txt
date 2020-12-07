@@ -1,0 +1,221 @@
+Input file:
+var sum, b;
+procedure getB;
+	begin
+		sum := 0;
+		read b;
+	end;
+procedure getSum;
+	var a;
+	begin
+		read a;
+		call getB;
+		sum := a + b;
+	end;
+begin
+	sum := 1;
+	call getSum;
+	write sum;
+end.
+
+/*Functions can also call functions of their ancestors (hence why CAL has an L).*/
+
+Lexeme Table:
+lexeme		token type
+var		29
+sum		2
+,		17
+b		2
+;		18
+procedure		30
+getB		2
+;		18
+begin		21
+sum		2
+:=		20
+0		3
+;		18
+read		32
+b		2
+;		18
+end		22
+;		18
+procedure		30
+getSum		2
+;		18
+var		29
+a		2
+;		18
+begin		21
+read		32
+a		2
+;		18
+call		27
+getB		2
+;		18
+sum		2
+:=		20
+a		2
++		4
+b		2
+;		18
+end		22
+;		18
+begin		21
+sum		2
+:=		20
+1		3
+;		18
+call		27
+getSum		2
+;		18
+write		31
+sum		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 sum 17 2 b 18 30 2 getB 18 21 2 sum 20 3 0 18 32 2 b 18 22 18 30 2 getSum 18 29 2 a 18 21 32 2 a 18 27 2 getB 18 2 sum 20 2 a 4 2 b 18 22 18 21 2 sum 20 3 1 18 27 2 getSum 18 31 2 sum 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym sum commasym identsym b semicolonsym procsym identsym getB semicolonsym beginsym identsym sum becomessym numbersym 0 semicolonsym readsym identsym b semicolonsym endsym semicolonsym procsym identsym getSum semicolonsym varsym identsym a semicolonsym beginsym readsym identsym a semicolonsym callsym identsym getB semicolonsym identsym sum becomessym identsym a plussym identsym b semicolonsym endsym semicolonsym beginsym identsym sum becomessym numbersym 1 semicolonsym callsym identsym getSum semicolonsym writesym identsym sum semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	18
+1	JMP	0	0	3
+2	JMP	0	0	9
+3	INC	0	0	3
+4	LIT	0	0	0
+5	STO	0	1	3
+6	SIO	0	0	2
+7	STO	0	1	4
+8	RTN	0	0	0
+9	INC	0	0	4
+10	SIO	0	0	2
+11	STO	0	0	3
+12	CAL	0	1	3
+13	LOD	0	0	3
+14	LOD	1	1	4
+15	ADD	0	0	1
+16	STO	0	1	3
+17	RTN	0	0	0
+18	INC	0	0	5
+19	LIT	0	0	1
+20	STO	0	0	3
+21	CAL	0	0	9
+22	LOD	0	0	3
+23	SIO	0	0	1
+24	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 18			18	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+18 inc 0 0 5			19	999	995
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0
+
+19 lit 0 0 1			20	999	995
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0
+
+20 sto 0 0 3			21	999	995
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0
+
+21 cal 0 0 9			9	994	995
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0
+
+9 inc 0 0 4			10	994	991
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 0
+
+
+Please enter an integer: 
+10 sio 0 0 2			11	994	991
+Registers: 8 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 0
+
+11 sto 0 0 3			12	994	991
+Registers: 8 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 8
+
+12 cal 0 1 3			3	990	991
+Registers: 8 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 8
+
+3 inc 0 0 3			4	990	988
+Registers: 8 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 8 999 | 994 13
+
+4 lit 0 0 0			5	990	988
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 8 999 | 994 13
+
+5 sto 0 1 3			6	990	988
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 | 999 999 22 8 999 | 994 13
+
+
+Please enter an integer: 
+6 sio 0 0 2			7	990	988
+Registers: 9 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 | 999 999 22 8 999 | 994 13
+
+7 sto 0 1 4			8	990	988
+Registers: 9 0 0 0 0 0 0 0
+Stack: 0 0 0 0 9 | 999 999 22 8 999 | 994 13
+
+8 rtn 0 0 0			13	994	991
+Registers: 9 0 0 0 0 0 0 0
+Stack: 0 0 0 0 9 | 999 999 22 8
+
+13 lod 0 0 3			14	994	991
+Registers: 8 0 0 0 0 0 0 0
+Stack: 0 0 0 0 9 | 999 999 22 8
+
+14 lod 1 1 4			15	994	991
+Registers: 8 9 0 0 0 0 0 0
+Stack: 0 0 0 0 9 | 999 999 22 8
+
+15 add 0 0 1			16	994	991
+Registers: 17 9 0 0 0 0 0 0
+Stack: 0 0 0 0 9 | 999 999 22 8
+
+16 sto 0 1 3			17	994	991
+Registers: 17 9 0 0 0 0 0 0
+Stack: 0 0 0 17 9 | 999 999 22 8
+
+17 rtn 0 0 0			22	999	995
+Registers: 17 9 0 0 0 0 0 0
+Stack: 0 0 0 17 9
+
+22 lod 0 0 3			23	999	995
+Registers: 17 9 0 0 0 0 0 0
+Stack: 0 0 0 17 9
+
+
+Register 0: 17
+
+23 sio 0 0 1			24	999	995
+Registers: 17 9 0 0 0 0 0 0
+Stack: 0 0 0 17 9
+
+24 sio 0 0 3			25	999	995
+Registers: 17 9 0 0 0 0 0 0
+Stack: 0 0 0 17 9
+

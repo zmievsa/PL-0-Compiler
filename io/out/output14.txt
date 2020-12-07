@@ -1,0 +1,132 @@
+Input file:
+procedure dummy1;
+	procedure dummy2;
+		write 0;
+	begin
+		call dummy2;
+		write 1;
+	end;
+begin
+	call dummy1;
+end.
+
+Lexeme Table:
+lexeme		token type
+procedure		30
+dummy1		2
+;		18
+procedure		30
+dummy2		2
+;		18
+write		31
+0		3
+;		18
+begin		21
+call		27
+dummy2		2
+;		18
+write		31
+1		3
+;		18
+end		22
+;		18
+begin		21
+call		27
+dummy1		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+30 2 dummy1 18 30 2 dummy2 18 31 3 0 18 21 27 2 dummy2 18 31 3 1 18 22 18 21 27 2 dummy1 18 22 19 
+
+Formatted Lexeme List:
+procsym identsym dummy1 semicolonsym procsym identsym dummy2 semicolonsym writesym numbersym 0 semicolonsym beginsym callsym identsym dummy2 semicolonsym writesym numbersym 1 semicolonsym endsym semicolonsym beginsym callsym identsym dummy1 semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	12
+1	JMP	0	0	7
+2	JMP	0	0	3
+3	INC	0	0	3
+4	LIT	0	0	0
+5	SIO	0	0	1
+6	RTN	0	0	0
+7	INC	0	0	3
+8	CAL	0	0	3
+9	LIT	0	0	1
+10	SIO	0	0	1
+11	RTN	0	0	0
+12	INC	0	0	3
+13	CAL	0	0	7
+14	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 12			12	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+12 inc 0 0 3			13	999	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+13 cal 0 0 7			7	996	997
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+7 inc 0 0 3			8	996	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14
+
+8 cal 0 0 3			3	993	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14
+
+3 inc 0 0 3			4	993	991
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 996 996 9
+
+4 lit 0 0 0			5	993	991
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 996 996 9
+
+
+Register 0: 0
+
+5 sio 0 0 1			6	993	991
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14 996 996 9
+
+6 rtn 0 0 0			9	996	994
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14
+
+9 lit 0 0 1			10	996	994
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14
+
+
+Register 0: 1
+
+10 sio 0 0 1			11	996	994
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 999 999 | 14
+
+11 rtn 0 0 0			14	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+
+14 sio 0 0 3			15	999	997
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0
+

@@ -1,0 +1,11 @@
+procedure dummy1;
+	; /* Do nothing. */
+procedure dummy2;
+	; /* Do nothing. */
+procedure dummy3;
+	; /* Do nothing. */
+begin
+	write 0;
+end.
+
+/* Checking if I relocate stuff properly. */

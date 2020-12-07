@@ -1,0 +1,315 @@
+Input file:
+var a;
+procedure dummy1;
+	begin
+		read a;
+		if a > 0 then write a;
+	end;
+procedure dummy2;
+	procedure dummy3;
+		procedure dummy4;
+			begin
+				if 1 > 0 then
+					begin
+						call dummy4;
+						call dummy3;
+						call dummy2;
+						call dummy1;
+					end;
+			end;
+		begin
+			if 1 < 0 then
+				begin
+					call dummy3;
+					call dummy2;
+					call dummy1;
+				end;
+		end;
+	begin
+		if 1 < 0 then
+			begin
+				call dummy2;
+				call dummy1;
+			end;
+	end;
+
+begin
+	call dummy1;
+	call dummy2;
+	write 0;
+end.
+
+/* Really torturing my relocator. */
+
+Lexeme Table:
+lexeme		token type
+var		29
+a		2
+;		18
+procedure		30
+dummy1		2
+;		18
+begin		21
+read		32
+a		2
+;		18
+if		23
+a		2
+>		13
+0		3
+then		24
+write		31
+a		2
+;		18
+end		22
+;		18
+procedure		30
+dummy2		2
+;		18
+procedure		30
+dummy3		2
+;		18
+procedure		30
+dummy4		2
+;		18
+begin		21
+if		23
+1		3
+>		13
+0		3
+then		24
+begin		21
+call		27
+dummy4		2
+;		18
+call		27
+dummy3		2
+;		18
+call		27
+dummy2		2
+;		18
+call		27
+dummy1		2
+;		18
+end		22
+;		18
+end		22
+;		18
+begin		21
+if		23
+1		3
+<		11
+0		3
+then		24
+begin		21
+call		27
+dummy3		2
+;		18
+call		27
+dummy2		2
+;		18
+call		27
+dummy1		2
+;		18
+end		22
+;		18
+end		22
+;		18
+begin		21
+if		23
+1		3
+<		11
+0		3
+then		24
+begin		21
+call		27
+dummy2		2
+;		18
+call		27
+dummy1		2
+;		18
+end		22
+;		18
+end		22
+;		18
+begin		21
+call		27
+dummy1		2
+;		18
+call		27
+dummy2		2
+;		18
+write		31
+0		3
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+29 2 a 18 30 2 dummy1 18 21 32 2 a 18 23 2 a 13 3 0 24 31 2 a 18 22 18 30 2 dummy2 18 30 2 dummy3 18 30 2 dummy4 18 21 23 3 1 13 3 0 24 21 27 2 dummy4 18 27 2 dummy3 18 27 2 dummy2 18 27 2 dummy1 18 22 18 22 18 21 23 3 1 11 3 0 24 21 27 2 dummy3 18 27 2 dummy2 18 27 2 dummy1 18 22 18 22 18 21 23 3 1 11 3 0 24 21 27 2 dummy2 18 27 2 dummy1 18 22 18 22 18 21 27 2 dummy1 18 27 2 dummy2 18 31 3 0 18 22 19 
+
+Formatted Lexeme List:
+varsym identsym a semicolonsym procsym identsym dummy1 semicolonsym beginsym readsym identsym a semicolonsym ifsym identsym a gtrsym numbersym 0 thensym writesym identsym a semicolonsym endsym semicolonsym procsym identsym dummy2 semicolonsym procsym identsym dummy3 semicolonsym procsym identsym dummy4 semicolonsym beginsym ifsym numbersym 1 gtrsym numbersym 0 thensym beginsym callsym identsym dummy4 semicolonsym callsym identsym dummy3 semicolonsym callsym identsym dummy2 semicolonsym callsym identsym dummy1 semicolonsym endsym semicolonsym endsym semicolonsym beginsym ifsym numbersym 1 lessym numbersym 0 thensym beginsym callsym identsym dummy3 semicolonsym callsym identsym dummy2 semicolonsym callsym identsym dummy1 semicolonsym endsym semicolonsym endsym semicolonsym beginsym ifsym numbersym 1 lessym numbersym 0 thensym beginsym callsym identsym dummy2 semicolonsym callsym identsym dummy1 semicolonsym endsym semicolonsym endsym semicolonsym beginsym callsym identsym dummy1 semicolonsym callsym identsym dummy2 semicolonsym writesym numbersym 0 semicolonsym endsym periodsym 
+
+
+No errors, program is syntactically correct.
+
+
+Assembly Code:
+Line	OP	R	L	M
+0	JMP	0	0	42
+1	JMP	0	0	5
+2	JMP	0	0	34
+3	JMP	0	0	25
+4	JMP	0	0	15
+5	INC	0	0	3
+6	SIO	0	0	2
+7	STO	0	1	3
+8	LOD	0	1	3
+9	LIT	1	0	0
+10	GTR	0	0	1
+11	JPC	0	0	14
+12	LOD	0	1	3
+13	SIO	0	0	1
+14	RTN	0	0	0
+15	INC	0	0	3
+16	LIT	0	0	1
+17	LIT	1	0	0
+18	GTR	0	0	1
+19	JPC	0	0	24
+20	CAL	0	1	15
+21	CAL	0	2	0
+22	CAL	0	3	0
+23	CAL	0	3	5
+24	RTN	0	0	0
+25	INC	0	0	3
+26	LIT	0	0	1
+27	LIT	1	0	0
+28	LSS	0	0	1
+29	JPC	0	0	33
+30	CAL	0	1	25
+31	CAL	0	2	0
+32	CAL	0	2	5
+33	RTN	0	0	0
+34	INC	0	0	3
+35	LIT	0	0	1
+36	LIT	1	0	0
+37	LSS	0	0	1
+38	JPC	0	0	41
+39	CAL	0	1	34
+40	CAL	0	1	5
+41	RTN	0	0	0
+42	INC	0	0	4
+43	CAL	0	0	5
+44	CAL	0	0	34
+45	LIT	0	0	0
+46	SIO	0	0	1
+47	SIO	0	0	3
+
+
+				pc	bp	sp
+Initial values			0	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 jmp 0 0 42			42	999	1000
+Registers: 0 0 0 0 0 0 0 0
+Stack:
+
+42 inc 0 0 4			43	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+43 cal 0 0 5			5	995	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0
+
+5 inc 0 0 3			6	995	993
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 0 999 | 999 44
+
+
+Please enter an integer: 
+6 sio 0 0 2			7	995	993
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 0 999 | 999 44
+
+7 sto 0 1 3			8	995	993
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 44
+
+8 lod 0 1 3			9	995	993
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 44
+
+9 lit 1 0 0			10	995	993
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 44
+
+10 gtr 0 0 1			11	995	993
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 44
+
+11 jpc 0 0 14			12	995	993
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 44
+
+12 lod 0 1 3			13	995	993
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 44
+
+
+Register 0: 2
+
+13 sio 0 0 1			14	995	993
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 44
+
+14 rtn 0 0 0			44	999	996
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2
+
+44 cal 0 0 34			34	995	996
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2
+
+34 inc 0 0 3			35	995	993
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 45
+
+35 lit 0 0 1			36	995	993
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 45
+
+36 lit 1 0 0			37	995	993
+Registers: 1 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 45
+
+37 lss 0 0 1			38	995	993
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 45
+
+38 jpc 0 0 41			41	995	993
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 2 999 | 999 45
+
+41 rtn 0 0 0			45	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 2
+
+45 lit 0 0 0			46	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 2
+
+
+Register 0: 0
+
+46 sio 0 0 1			47	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 2
+
+47 sio 0 0 3			48	999	996
+Registers: 0 0 0 0 0 0 0 0
+Stack: 0 0 0 2
+

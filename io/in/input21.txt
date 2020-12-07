@@ -1,0 +1,7 @@
+procedure test;
+	write 1; 
+begin
+	call test;
+	write 2;
+end.
+/* Now see if my procedures can do stuff. */

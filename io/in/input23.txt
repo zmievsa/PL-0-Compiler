@@ -1,0 +1,13 @@
+procedure test;
+	var a;
+	begin
+		read a;
+		a := a + 1;
+		write a;
+	end;
+begin
+	call test;
+	write 2;
+end.
+
+/*Using variables in procedures.*/

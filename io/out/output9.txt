@@ -1,0 +1,56 @@
+Input file:
+const fail = -1, pass = 1;
+var value;
+begin
+	read value;
+	if value < 60 then
+		write fail
+	else
+		write pass;
+end.
+
+/*Ensures else statements work.*/
+
+Lexeme Table:
+lexeme		token type
+const		28
+fail		2
+=		9
+-		5
+1		3
+,		17
+pass		2
+=		9
+1		3
+;		18
+var		29
+value		2
+;		18
+begin		21
+read		32
+value		2
+;		18
+if		23
+value		2
+<		11
+60		3
+then		24
+write		31
+fail		2
+else		33
+write		31
+pass		2
+;		18
+end		22
+.		19
+
+
+Raw Lexeme List:
+28 2 fail 9 5 3 1 17 2 pass 9 3 1 18 29 2 value 18 21 32 2 value 18 23 2 value 11 3 60 24 31 2 fail 33 31 2 pass 18 22 19 
+
+Formatted Lexeme List:
+constsym identsym fail eqlsym minussym numbersym 1 commasym identsym pass eqlsym numbersym 1 semicolonsym varsym identsym value semicolonsym beginsym readsym identsym value semicolonsym ifsym identsym value lessym numbersym 60 thensym writesym identsym fail elsesym writesym identsym pass semicolonsym endsym periodsym 
+
+
+
+Error number 10 on line 1 on token '-': = must be followed by a number.

@@ -18,7 +18,7 @@
 
 const char *RESERVED_KEYWORDS[] = {"const", "var", "procedure", "call", "begin", "end", "if", "then", "else", "while", "do", "read", "write", "odd"};
 const char SPECIAL_SYMBOLS[] = "+-*/()=,.<>;:";
-const char INVISIBLE_CHARS[] = "\t \n";
+const char INVISIBLE_CHARS[] = "\t \n\r";
 
 int isLatinAlpha(char c)
 {
