@@ -82,12 +82,12 @@ Line	OP	R	L	M
 2	JMP	0	0	3
 3	INC	0	0	3
 4	SIO	0	0	2
-5	STO	0	1	3
+5	STO	0	2	3
 6	SIO	0	0	2
 7	STO	0	1	3
 8	LOD	1	1	3
 9	ADD	0	0	1
-10	STO	0	1	3
+10	STO	0	2	3
 11	RTN	0	0	0
 12	INC	0	0	4
 13	CAL	0	0	3
@@ -131,55 +131,55 @@ Stack: 0 0 0 0 999 | 999 17 0 995 995 | 14
 
 Please enter an integer: 
 4 sio 0 0 2			5	991	989
-Registers: 3 0 0 0 0 0 0 0
+Registers: 5 0 0 0 0 0 0 0
 Stack: 0 0 0 0 999 | 999 17 0 995 995 | 14
 
-5 sto 0 1 3			6	991	989
-Registers: 3 0 0 0 0 0 0 0
-Stack: 0 0 0 0 999 | 999 17 3 995 995 | 14
+5 sto 0 2 3			6	991	989
+Registers: 5 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 17 0 995 995 | 14
 
 
 Please enter an integer: 
 6 sio 0 0 2			7	991	989
-Registers: 9 0 0 0 0 0 0 0
-Stack: 0 0 0 0 999 | 999 17 3 995 995 | 14
+Registers: 6 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 17 0 995 995 | 14
 
 7 sto 0 1 3			8	991	989
-Registers: 9 0 0 0 0 0 0 0
-Stack: 0 0 0 0 999 | 999 17 9 995 995 | 14
+Registers: 6 0 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 17 6 995 995 | 14
 
 8 lod 1 1 3			9	991	989
-Registers: 9 9 0 0 0 0 0 0
-Stack: 0 0 0 0 999 | 999 17 9 995 995 | 14
+Registers: 6 6 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 17 6 995 995 | 14
 
 9 add 0 0 1			10	991	989
-Registers: 18 9 0 0 0 0 0 0
-Stack: 0 0 0 0 999 | 999 17 9 995 995 | 14
+Registers: 12 6 0 0 0 0 0 0
+Stack: 0 0 0 5 999 | 999 17 6 995 995 | 14
 
-10 sto 0 1 3			11	991	989
-Registers: 18 9 0 0 0 0 0 0
-Stack: 0 0 0 0 999 | 999 17 18 995 995 | 14
+10 sto 0 2 3			11	991	989
+Registers: 12 6 0 0 0 0 0 0
+Stack: 0 0 0 12 999 | 999 17 6 995 995 | 14
 
 11 rtn 0 0 0			14	995	992
-Registers: 18 9 0 0 0 0 0 0
-Stack: 0 0 0 0 999 | 999 17 18
+Registers: 12 6 0 0 0 0 0 0
+Stack: 0 0 0 12 999 | 999 17 6
 
 14 rtn 0 0 0			17	999	996
-Registers: 18 9 0 0 0 0 0 0
-Stack: 0 0 0 0
+Registers: 12 6 0 0 0 0 0 0
+Stack: 0 0 0 12
 
 17 lod 0 0 3			18	999	996
-Registers: 0 9 0 0 0 0 0 0
-Stack: 0 0 0 0
+Registers: 12 6 0 0 0 0 0 0
+Stack: 0 0 0 12
 
 
-Register 0: 0
+Register 0: 12
 
 18 sio 0 0 1			19	999	996
-Registers: 0 9 0 0 0 0 0 0
-Stack: 0 0 0 0
+Registers: 12 6 0 0 0 0 0 0
+Stack: 0 0 0 12
 
 19 sio 0 0 3			20	999	996
-Registers: 0 9 0 0 0 0 0 0
-Stack: 0 0 0 0
+Registers: 12 6 0 0 0 0 0 0
+Stack: 0 0 0 12
 

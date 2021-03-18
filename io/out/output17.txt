@@ -147,75 +147,75 @@ Stack: 0 0 0 1 0 | 999 999 22 0
 
 Please enter an integer: 
 10 sio 0 0 2			11	994	991
-Registers: 8 0 0 0 0 0 0 0
+Registers: 9 0 0 0 0 0 0 0
 Stack: 0 0 0 1 0 | 999 999 22 0
 
 11 sto 0 0 3			12	994	991
-Registers: 8 0 0 0 0 0 0 0
-Stack: 0 0 0 1 0 | 999 999 22 8
+Registers: 9 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 9
 
 12 cal 0 1 3			3	990	991
-Registers: 8 0 0 0 0 0 0 0
-Stack: 0 0 0 1 0 | 999 999 22 8
+Registers: 9 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 9
 
 3 inc 0 0 3			4	990	988
-Registers: 8 0 0 0 0 0 0 0
-Stack: 0 0 0 1 0 | 999 999 22 8 999 | 994 13
+Registers: 9 0 0 0 0 0 0 0
+Stack: 0 0 0 1 0 | 999 999 22 9 999 | 994 13
 
 4 lit 0 0 0			5	990	988
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 1 0 | 999 999 22 8 999 | 994 13
+Stack: 0 0 0 1 0 | 999 999 22 9 999 | 994 13
 
 5 sto 0 1 3			6	990	988
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 0 0 | 999 999 22 8 999 | 994 13
+Stack: 0 0 0 0 0 | 999 999 22 9 999 | 994 13
 
 
 Please enter an integer: 
 6 sio 0 0 2			7	990	988
-Registers: 9 0 0 0 0 0 0 0
-Stack: 0 0 0 0 0 | 999 999 22 8 999 | 994 13
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 0 0 | 999 999 22 9 999 | 994 13
 
 7 sto 0 1 4			8	990	988
-Registers: 9 0 0 0 0 0 0 0
-Stack: 0 0 0 0 9 | 999 999 22 8 999 | 994 13
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 0 2 | 999 999 22 9 999 | 994 13
 
 8 rtn 0 0 0			13	994	991
-Registers: 9 0 0 0 0 0 0 0
-Stack: 0 0 0 0 9 | 999 999 22 8
+Registers: 2 0 0 0 0 0 0 0
+Stack: 0 0 0 0 2 | 999 999 22 9
 
 13 lod 0 0 3			14	994	991
-Registers: 8 0 0 0 0 0 0 0
-Stack: 0 0 0 0 9 | 999 999 22 8
+Registers: 9 0 0 0 0 0 0 0
+Stack: 0 0 0 0 2 | 999 999 22 9
 
 14 lod 1 1 4			15	994	991
-Registers: 8 9 0 0 0 0 0 0
-Stack: 0 0 0 0 9 | 999 999 22 8
+Registers: 9 2 0 0 0 0 0 0
+Stack: 0 0 0 0 2 | 999 999 22 9
 
 15 add 0 0 1			16	994	991
-Registers: 17 9 0 0 0 0 0 0
-Stack: 0 0 0 0 9 | 999 999 22 8
+Registers: 11 2 0 0 0 0 0 0
+Stack: 0 0 0 0 2 | 999 999 22 9
 
 16 sto 0 1 3			17	994	991
-Registers: 17 9 0 0 0 0 0 0
-Stack: 0 0 0 17 9 | 999 999 22 8
+Registers: 11 2 0 0 0 0 0 0
+Stack: 0 0 0 11 2 | 999 999 22 9
 
 17 rtn 0 0 0			22	999	995
-Registers: 17 9 0 0 0 0 0 0
-Stack: 0 0 0 17 9
+Registers: 11 2 0 0 0 0 0 0
+Stack: 0 0 0 11 2
 
 22 lod 0 0 3			23	999	995
-Registers: 17 9 0 0 0 0 0 0
-Stack: 0 0 0 17 9
+Registers: 11 2 0 0 0 0 0 0
+Stack: 0 0 0 11 2
 
 
-Register 0: 17
+Register 0: 11
 
 23 sio 0 0 1			24	999	995
-Registers: 17 9 0 0 0 0 0 0
-Stack: 0 0 0 17 9
+Registers: 11 2 0 0 0 0 0 0
+Stack: 0 0 0 11 2
 
 24 sio 0 0 3			25	999	995
-Registers: 17 9 0 0 0 0 0 0
-Stack: 0 0 0 17 9
+Registers: 11 2 0 0 0 0 0 0
+Stack: 0 0 0 11 2
 

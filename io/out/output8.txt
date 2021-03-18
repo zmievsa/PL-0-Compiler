@@ -1,2 +1,24 @@
+Input file:
+var b;
+b := a.
 
-File 'io/in/input8.txt' does not exist.
+Lexeme Table:
+lexeme		token type
+var		29
+b		2
+;		18
+b		2
+:=		20
+a		2
+.		19
+
+
+Raw Lexeme List:
+29 2 b 18 2 b 20 2 a 19 
+
+Formatted Lexeme List:
+varsym identsym b semicolonsym identsym b becomessym identsym a periodsym 
+
+
+
+Error number 15 on line 2 on token 'a': Undeclared identifier.

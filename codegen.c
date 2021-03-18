@@ -73,6 +73,23 @@ symbol *symbolTableGetByNameAndLevel(symbol **sym_table, char *name, int level)
     return NULL;
 }
 
+symbol *symbolTableGetByNameAndKindAndClosestLevel(symbol **sym_table, char *name, int level, int kind)
+{
+    symbol *closestByLevel = NULL;
+	symbol *sym;
+	for (int i = 0; i < MAX_LIST_SIZE; i++) {
+		sym = sym_table[i];
+		if (sym == NULL)
+			break;
+		if (sym->kind == kind && streql(sym->name, name)) {
+			if (closestByLevel == NULL || (abs(sym->level - level) < abs(closestByLevel->level - level)))
+				if (sym->mark == 0)
+					closestByLevel = sym;
+		} 
+	}
+	return closestByLevel;
+}
+
 
 symbol *symbolTableGetByNameAndClosestLevel(symbol **sym_table, char *name, int level) {
 	symbol *closestByLevel = NULL;
@@ -247,7 +264,7 @@ static void statement(state *st, int lex_level)
 	int savedCodeIndexForJump;
 	if (ltype == IDENTSYM)
 	{
-		savedSymbol = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
+		savedSymbol = symbolTableGetByNameAndKindAndClosestLevel(st->sym_table, ldata, lex_level, SYMBOL_VAR);
 		nextLexeme(st);
 		nextLexeme(st);
 		expression(st, 0, lex_level);
@@ -255,7 +272,7 @@ static void statement(state *st, int lex_level)
 	}
 	else if (ltype == CALLSYM) {
 		nextLexeme(st);
-		savedSymbol = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
+		savedSymbol = symbolTableGetByNameAndKindAndClosestLevel(st->sym_table, ldata, lex_level, SYMBOL_PROC);
 		emit(st, CAL, 0, lex_level - savedSymbol->level, savedSymbol->addr);
 		nextLexeme(st);
 	}
@@ -305,7 +322,7 @@ static void statement(state *st, int lex_level)
 	else if (ltype == READSYM)
 	{
 		nextLexeme(st);
-		symbol *var = symbolTableGetByNameAndClosestLevel(st->sym_table, ldata, lex_level);
+		symbol *var = symbolTableGetByNameAndKindAndClosestLevel(st->sym_table, ldata, lex_level, SYMBOL_VAR);
 		nextLexeme(st);
 		emit(st, SIO, 0, 0, 2); // READ
 		emit(st, STO, 0, lex_level - var->level, var->addr);

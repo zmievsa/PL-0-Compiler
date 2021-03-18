@@ -232,84 +232,84 @@ Stack: 0 0 0 0 999 | 999 44
 
 Please enter an integer: 
 6 sio 0 0 2			7	995	993
-Registers: 2 0 0 0 0 0 0 0
+Registers: 3 0 0 0 0 0 0 0
 Stack: 0 0 0 0 999 | 999 44
 
 7 sto 0 1 3			8	995	993
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 44
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3 999 | 999 44
 
 8 lod 0 1 3			9	995	993
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 44
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3 999 | 999 44
 
 9 lit 1 0 0			10	995	993
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 44
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3 999 | 999 44
 
 10 gtr 0 0 1			11	995	993
 Registers: 1 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 44
+Stack: 0 0 0 3 999 | 999 44
 
 11 jpc 0 0 14			12	995	993
 Registers: 1 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 44
+Stack: 0 0 0 3 999 | 999 44
 
 12 lod 0 1 3			13	995	993
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 44
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3 999 | 999 44
 
 
-Register 0: 2
+Register 0: 3
 
 13 sio 0 0 1			14	995	993
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 44
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3 999 | 999 44
 
 14 rtn 0 0 0			44	999	996
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3
 
 44 cal 0 0 34			34	995	996
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3
 
 34 inc 0 0 3			35	995	993
-Registers: 2 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 45
+Registers: 3 0 0 0 0 0 0 0
+Stack: 0 0 0 3 999 | 999 45
 
 35 lit 0 0 1			36	995	993
 Registers: 1 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 45
+Stack: 0 0 0 3 999 | 999 45
 
 36 lit 1 0 0			37	995	993
 Registers: 1 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 45
+Stack: 0 0 0 3 999 | 999 45
 
 37 lss 0 0 1			38	995	993
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 45
+Stack: 0 0 0 3 999 | 999 45
 
 38 jpc 0 0 41			41	995	993
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 2 999 | 999 45
+Stack: 0 0 0 3 999 | 999 45
 
 41 rtn 0 0 0			45	999	996
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 2
+Stack: 0 0 0 3
 
 45 lit 0 0 0			46	999	996
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 2
+Stack: 0 0 0 3
 
 
 Register 0: 0
 
 46 sio 0 0 1			47	999	996
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 2
+Stack: 0 0 0 3
 
 47 sio 0 0 3			48	999	996
 Registers: 0 0 0 0 0 0 0 0
-Stack: 0 0 0 2
+Stack: 0 0 0 3
 
